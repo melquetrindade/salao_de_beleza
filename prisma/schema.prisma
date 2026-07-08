@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum DisponibilidadeStatus {
+  LIVRE
+  RESERVADO
+  BLOQUEADO
+}
+
+enum AgendamentoStatus {
+  AGENDADO
+  CANCELADO
+  FINALIZADO
+}
+
+model Usuario {
+  id       String  @id @default(uuid())
+  nome     String
+  email    String  @unique
+  telefone String?
+  imgURL   String?
+
+  agendamentos Agendamento[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("usuarios")
+}
+
+model Barbearia {
+  id       String  @id @default(uuid())
+  nome     String
+  endereco String
+  imgURL   String?
+
+  administradores Administrador[]
+  profissionais   Profissional[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("barbearias")
+}
+
+model Administrador {
+  id String @id @default(uuid())
+
+  nome   String
+  email  String  @unique
+  imgURL String?
+
+  barbeariaId String
+  barbearia   Barbearia @relation(fields: [barbeariaId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("administradores")
+}
+
+model Profissional {
+  id String @id @default(uuid())
+
+  nome     String
+  imgURL   String?
+  telefone String?
+  ativo    Boolean @default(true)
+
+  barbeariaId String
+  barbearia   Barbearia @relation(fields: [barbeariaId], references: [id], onDelete: Cascade)
+
+  servicos         Servico[]
+  disponibilidades Disponibilidade[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("profissionais")
+}
+
+model Servico {
+  id String @id @default(uuid())
+
+  nome      String
+  descricao String?
+  imgURL    String?
+  preco     Decimal @db.Decimal(10, 2)
+  ativo     Boolean @default(true)
+
+  profissionalId String
+  profissional   Profissional @relation(fields: [profissionalId], references: [id], onDelete: Cascade)
+
+  agendamentos Agendamento[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("servicos")
+}
+
+model Disponibilidade {
+  id String @id @default(uuid())
+
+  data       DateTime
+  horaInicio String
+  horaFim    String
+  status     DisponibilidadeStatus @default(LIVRE)
+
+  profissionalId String
+  profissional   Profissional @relation(fields: [profissionalId], references: [id], onDelete: Cascade)
+
+  agendamentos Agendamento[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("disponibilidades")
+}
+
+model Agendamento {
+  id String @id @default(uuid())
+
+  status AgendamentoStatus @default(AGENDADO)
+
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  servicoId String
+  servico   Servico @relation(fields: [servicoId], references: [id], onDelete: Cascade)
+
+  disponibilidadeId String
+  disponibilidade   Disponibilidade @relation(fields: [disponibilidadeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("agendamentos")
+}
