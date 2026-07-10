@@ -8,7 +8,8 @@ declare module "next-auth" {
   interface Session {
     user: DefaultSession["user"] & {
       id: string;
-      barbeariaId: string;
+      barbeariaId?: string;
+      role: "admin" | "client";
     };
   }
 
@@ -29,13 +30,9 @@ export const authOptions: AuthOptions = {
   ],
   callbacks: {
     async signIn({ user }) {
-      const administrador = await db.administrador.findUnique({
-        where: {
-          email: user.email!,
-        },
-      });
-
-      return !!administrador;
+      // Permite qualquer usuário fazer login (clientes e administradores)
+      // A restrição de administrador será feita na rota /admin/dashboard
+      return true;
     },
 
     async session({ session }) {
@@ -47,6 +44,9 @@ export const authOptions: AuthOptions = {
 
       if (administrador) {
         session.user.barbeariaId = administrador.barbeariaId;
+        session.user.role = "admin";
+      } else {
+        session.user.role = "client";
       }
 
       return session;

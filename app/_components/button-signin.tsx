@@ -3,11 +3,12 @@
 import { signIn } from "next-auth/react";
 import { Button } from "./ui/button";
 import Image from "next/image";
-import { useSession } from "next-auth/react";
+//import { useSession } from "next-auth/react";
 
 const ButtonSignin = () => {
-    const {data} = useSession()
-    console.log(data)
+    //const {data} = useSession() // Usado apenas em use client e pode ser utilizado para criar componente de loading
+    //console.log(data)
+
     const handleLoginWithGoogleClick = () => {
         signIn("google", {
             callbackUrl: "/admin/dashboard",
