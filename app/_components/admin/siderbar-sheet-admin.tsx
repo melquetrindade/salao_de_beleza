@@ -9,7 +9,7 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
-import { HomeIcon, LogOutIcon, UserRoundPlusIcon } from "lucide-react";
+import { BookUser, HomeIcon, LogOutIcon, UserRoundPlusIcon } from "lucide-react";
 import Link from "next/link";
 
 const SiderbarSheetAdmin = () => {
@@ -58,8 +58,8 @@ const SiderbarSheetAdmin = () => {
           variant="ghost"
           render={<SheetClose />}
         >
-          <UserRoundPlusIcon />
-          <Link href="/admin/professionals">Cadastrar profissional</Link>
+          <BookUser />
+          <Link href="/admin/professionals">Profissional</Link>
         </Button>
       </div>
 
