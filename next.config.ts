@@ -5,7 +5,15 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "glorious-sapphire-jnquc9mg.edgeone.dev",
+        hostname: "ead.graup.com.br",
+      },
+      {
+        protocol: "https",
+        hostname: "encrypted-tbn0.gstatic.com",
+      },
+      {
+        protocol: "https",
+        hostname: "negociosemindaiatuba.com.br",
       },
     ],
   },

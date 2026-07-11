@@ -59,7 +59,7 @@ const SiderbarSheetAdmin = () => {
           render={<SheetClose />}
         >
           <BookUser />
-          <Link href="/admin/professionals">Profissional</Link>
+          <Link href="/admin/professionals">Profissionais</Link>
         </Button>
       </div>
 

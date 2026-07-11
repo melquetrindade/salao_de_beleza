@@ -11,6 +11,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod"
 import { Field, FieldContent, FieldError, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
+import { createProfessional } from "@/app/_actions/create-professional";
+import ProfessionalItem from "./professional-item";
 
 const professionalSchema = z.object({
   nome: z
@@ -41,8 +43,16 @@ const ListProfessionals = () => {
         },
     });
 
-    const onSubmit = (data: ProfessionalSchema) => {
+    const onSubmit = async (data: ProfessionalSchema) => {
         console.log(data);
+
+        const newProfessional = await createProfessional({
+            nome: data.nome,
+            telefone: data.telefone,
+            imgURL: data.imagemUrl
+        })
+        setProfessionals((old) => [...old, newProfessional])
+
         form.reset();
         setOpenDialog(false)
     }
@@ -61,8 +71,8 @@ const ListProfessionals = () => {
     }
 
     return (
-        <div>
-            <div className="flex items-center justify-end p-3">
+        <div className="p-5">
+            <div className="flex items-center justify-end mb-7">
                 <Button onClick={handleOpenDialog}>
                     <UserRoundPlusIcon/>
                     Cadastrar profissional
@@ -72,7 +82,11 @@ const ListProfessionals = () => {
             {professionals.length == 0 ? (
                 <h1>Não tem profissionais</h1>
             ) : (
-                <h1>{`Existem ${professionals.length} na barbearia`}</h1>
+                <div className="flex gap-4 overflow-auto mb-10 [&::-webkit-scrollbar]:hidden">
+                    {professionals.map((professional) => (
+                        <ProfessionalItem key={professional.telefone} professional={professional}/>
+                    ))}
+                </div>
             )}
 
             <Dialog open={openDialog} onOpenChange={(open) => {
