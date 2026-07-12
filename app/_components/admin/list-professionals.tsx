@@ -6,13 +6,14 @@ import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { UserRoundPlusIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod"
 import { Field, FieldContent, FieldError, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { createProfessional } from "@/app/_actions/create-professional";
 import ProfessionalItem from "./professional-item";
+import Image from "next/image";
 
 const professionalSchema = z.object({
   nome: z
@@ -23,9 +24,20 @@ const professionalSchema = z.object({
     .string()
     .min(10, "Telefone inválido."),
 
-  imagemUrl: z
-    .string()
-    .url("Informe uma URL válida."),
+    imagem: z
+        .instanceof(File, {
+        message: "Selecione uma imagem.",
+        })
+        .refine(
+        (file) =>
+            ["image/jpeg", "image/png", "image/webp"].includes(file.type),
+        {
+            message: "Formato de imagem inválido.",
+        }
+        )
+        .refine((file) => file.size <= 5 * 1024 * 1024, {
+        message: "A imagem deve ter no máximo 5 MB.",
+        }),
 });
 
 type ProfessionalSchema = z.infer<typeof professionalSchema>;
@@ -33,27 +45,28 @@ type ProfessionalSchema = z.infer<typeof professionalSchema>;
 const ListProfessionals = () => {
     const [professionals, setProfessionals] = useState<Profissional[]>([])
     const [openDialog, setOpenDialog] = useState(false)
+    const [preview, setPreview] = useState<string | null>(null);
 
     const form = useForm<ProfessionalSchema>({
         resolver: zodResolver(professionalSchema),
         defaultValues: {
         nome: "",
         telefone: "",
-        imagemUrl: "",
         },
     });
 
     const onSubmit = async (data: ProfessionalSchema) => {
-        console.log(data);
+        const formData = new FormData();
 
-        const newProfessional = await createProfessional({
-            nome: data.nome,
-            telefone: data.telefone,
-            imgURL: data.imagemUrl
-        })
+        formData.append("nome", data.nome);
+        formData.append("telefone", data.telefone ?? "");
+        formData.append("imagem", data.imagem);
+
+        const newProfessional = await createProfessional(formData)
         setProfessionals((old) => [...old, newProfessional])
 
         form.reset();
+        setPreview(null);
         setOpenDialog(false)
     }
 
@@ -96,7 +109,7 @@ const ListProfessionals = () => {
                     form.reset();
                 }
             }}>
-                <DialogContent className='w-[90%]'>
+                <DialogContent className='w-[90%] max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden'>
                     <DialogHeader>
                         <DialogTitle>Preencha as informações</DialogTitle>
                     </DialogHeader>
@@ -139,21 +152,58 @@ const ListProfessionals = () => {
                             </Field>
 
                             <Field>
-                                <FieldLabel htmlFor="imagemUrl">Imagem URL</FieldLabel>
+                                <FieldLabel htmlFor="imagem">
+                                    Foto do Profissional
+                                </FieldLabel>
 
                                 <FieldContent>
-                                    <Input
-                                    id="imagemUrl"
-                                    placeholder="https://..."
-                                    {...form.register("imagemUrl")}
+                                    <Controller
+                                    control={form.control}
+                                    name="imagem"
+                                    render={({ field }) => (
+                                        <Input
+                                        id="imagem"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+
+                                            if (!file) return;
+
+                                            // Atualiza o React Hook Form
+                                            field.onChange(file);
+
+                                            // Atualiza o preview
+                                            if (preview) {
+                                            URL.revokeObjectURL(preview);
+                                            }
+
+                                            setPreview(URL.createObjectURL(file));
+                                        }}
+                                        />
+                                    )}
                                     />
 
                                     <FieldError>
-                                    {form.formState.errors.imagemUrl?.message}
+                                    {form.formState.errors.imagem?.message}
                                     </FieldError>
                                 </FieldContent>
                             </Field>
                         </FieldGroup>
+
+                        {preview && (
+                            <div className="flex justify-center">
+                                <Image
+                                    src={preview}
+                                    alt="Pré-visualização"
+                                    width={80}
+                                    height={80}
+                                    priority
+                                    className="rounded-md object-cover"
+                                    style={{ width: "auto", height: "auto" }}
+                                />
+                            </div>
+                        )}
 
                         <Button type="submit" className="w-full">
                             Cadastrar Profissional
