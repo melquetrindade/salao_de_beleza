@@ -6,21 +6,13 @@ import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { UserRoundPlusIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Field,
-  FieldContent,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "../ui/field";
-import { Input } from "../ui/input";
 import { createProfessional } from "@/app/_actions/create-professional";
 import ProfessionalItem from "./professional-item";
-import Image from "next/image";
 import { toast } from "sonner";
 import { professionalSchema, ProfessionalSchema } from "@/app/schema/professional-schema";
+import FormDialog from "./form-dialog";
 
 
 
@@ -102,6 +94,7 @@ const ListProfessionals = () => {
             <ProfessionalItem
               key={professional.telefone}
               professional={professional}
+              setProfessionals={setProfessionals}
             />
           ))}
         </div>
@@ -123,95 +116,7 @@ const ListProfessionals = () => {
             <DialogTitle>Preencha as informações</DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="nome">Nome</FieldLabel>
-
-                <FieldContent>
-                  <Input
-                    id="nome"
-                    placeholder="Digite o nome"
-                    {...form.register("nome")}
-                  />
-
-                  <FieldError>{form.formState.errors.nome?.message}</FieldError>
-                </FieldContent>
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="telefone">Telefone</FieldLabel>
-
-                <FieldContent>
-                  <Input
-                    id="telefone"
-                    placeholder="(84) 99999-9999"
-                    {...form.register("telefone")}
-                  />
-
-                  <FieldError>
-                    {form.formState.errors.telefone?.message}
-                  </FieldError>
-                </FieldContent>
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="imagem">Foto do Profissional</FieldLabel>
-
-                <FieldContent>
-                  <Controller
-                    control={form.control}
-                    name="imagem"
-                    render={({ field }) => (
-                      <Input
-                        id="imagem"
-                        type="file"
-                        accept="image/*"
-                        className="file:mr-3 text-[0.8125rem]"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-
-                          if (!file) return;
-
-                          // Atualiza o React Hook Form
-                          field.onChange(file);
-
-                          // Atualiza o preview
-                          if (preview) {
-                            URL.revokeObjectURL(preview);
-                          }
-
-                          setPreview(URL.createObjectURL(file));
-                        }}
-                      />
-                    )}
-                  />
-
-                  <FieldError>
-                    {form.formState.errors.imagem?.message}
-                  </FieldError>
-                </FieldContent>
-              </Field>
-            </FieldGroup>
-
-            {preview && (
-              <div className="flex justify-center">
-                <div className="relative min-w-[140px] h-[180px]">
-                  <Image
-                    src={preview}
-                    alt="Pré-visualização"
-                    fill
-                    priority
-                    className="rounded-md object-cover object-top"
-                  />
-                </div>
-              </div>
-            )}
-
-            <Button type="submit" className="w-full">
-              Cadastrar
-            </Button>
-          </form>
+          <FormDialog form={form} onSubmit={onSubmit} preview={preview} setPreview={setPreview}/>
         </DialogContent>
       </Dialog>
     </div>
