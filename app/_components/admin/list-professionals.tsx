@@ -116,7 +116,7 @@ const ListProfessionals = () => {
             <DialogTitle>Preencha as informações</DialogTitle>
           </DialogHeader>
 
-          <FormDialog form={form} onSubmit={onSubmit} preview={preview} setPreview={setPreview}/>
+          <FormDialog form={form} onSubmit={onSubmit} preview={preview} setPreview={setPreview} submitLabel="Cadastrar"/>
         </DialogContent>
       </Dialog>
     </div>

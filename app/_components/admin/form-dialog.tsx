@@ -14,9 +14,10 @@ interface FormDialogProps {
     onSubmit: (data: ProfessionalSchema) => Promise<void>;
     preview: string | null;
     setPreview: Dispatch<SetStateAction<string | null>>;
+    submitLabel?: string;
 }
 
-const FormDialog = ({ form, onSubmit, preview, setPreview }: FormDialogProps) => {
+const FormDialog = ({ form, onSubmit, preview, setPreview, submitLabel = "Cadastrar" }: FormDialogProps) => {
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FieldGroup>
@@ -104,7 +105,7 @@ const FormDialog = ({ form, onSubmit, preview, setPreview }: FormDialogProps) =>
             )}
 
             <Button type="submit" className="w-full">
-                Cadastrar
+                {submitLabel}
             </Button>
         </form>
     );

@@ -2,7 +2,7 @@ import { Profissional } from "@prisma/client";
 import { Card, CardContent } from "../ui/card";
 import Image from "next/image";
 import { Button } from "../ui/button";
-import { EditIcon, ShieldMinus, UserRoundX } from "lucide-react";
+import { BanIcon, EditIcon, ShieldCheck, ShieldCheckIcon, ShieldMinus, ShieldMinusIcon, StarIcon, UserRoundX } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -13,6 +13,9 @@ import FormDialog from "./form-dialog";
 import { updateProfessional } from "@/app/_actions/update-professional";
 import { deleteProfessional } from "@/app/_actions/delete-professional";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
+import { Badge } from "../ui/badge";
+import { desactivedProfessional } from "@/app/_actions/desactive-professional";
+import ActionsProfessionals from "./actions-professionals";
 
 interface ProfessioanlItemProps {
   professional: Profissional;
@@ -21,6 +24,8 @@ interface ProfessioanlItemProps {
 
 const ProfessionalItem = ({ professional, setProfessionals }: ProfessioanlItemProps) => {
   const [openDialog, setOpenDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openDesactiveDialog, setOpenDesactiveDialog] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
 
   const form = useForm<ProfessionalSchema>({
@@ -72,6 +77,7 @@ const ProfessionalItem = ({ professional, setProfessionals }: ProfessioanlItemPr
     try {
       await deleteProfessional(professional.id, professional.imgURLPublicId);
       setProfessionals((old) => old.filter((p) => p.id !== professional.id));
+      setOpenDeleteDialog(false);
       toast.success("Profissional excluído com sucesso!", {
         style: {
           background: "#22c55e",
@@ -96,7 +102,35 @@ const ProfessionalItem = ({ professional, setProfessionals }: ProfessioanlItemPr
     setOpenDialog(!openDialog);
   };
 
+  const handleDesactivated = async () => {
+    try {
+      const action = !professional.ativo
 
+      await desactivedProfessional(professional.id, action);
+      setProfessionals((old) =>
+        old.map((p) => (p.id === professional.id ? { ...p, ativo: action } : p))
+      );
+      setOpenDesactiveDialog(false);
+
+      toast.success(`Profissional ${action ? 'ativado' : 'desativado'} com sucesso!`, {
+        style: {
+          background: "#22c55e",
+          color: "#fff"
+        }
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message, {
+          style: {
+            background: "#ef4444",
+            color: "#fff",
+          }
+        });
+      } else {
+        toast.error(`Erro ao ${!professional.ativo ? 'ativar' : 'desativar'} profissional.`);
+      }
+    }
+  }
 
   return (
     <Card className="min-w-[167px] rounded-2xl border border-primary bg-secondary">
@@ -116,6 +150,20 @@ const ProfessionalItem = ({ professional, setProfessionals }: ProfessioanlItemPr
               Sem imagem
             </div>
           )}
+          {
+            professional.ativo ? (
+              <Badge className=" space-x-1 absolute rounded-md left-2 top-2 bg-green-500">
+                <ShieldCheckIcon size={12}/>
+                <p className="text-xs font-semibold">Ativo</p>  
+              </Badge>
+            ) : (
+              <Badge className=" space-x-1 absolute rounded-md left-2 top-2 bg-gray-400">
+                <ShieldMinusIcon size={12}/>
+                <p className="text-xs font-semibold">Desativado</p>
+              </Badge>
+            )
+          }
+          
         </div>
 
         {/*Texto */}
@@ -123,54 +171,17 @@ const ProfessionalItem = ({ professional, setProfessionals }: ProfessioanlItemPr
           <h3 className="truncate font-semibold">{professional.nome}</h3>
         </div>
 
-        <div className="w-full">
-          <Button className="w-[100%]" variant="destructive">
-            Ver agenda
-          </Button>
-          <div className="flex flex-row justify-between gap-2 w-full mt-2 pr-1">
-            <Button className="w-[32%]" variant="outline" onClick={handleOpenDialog}>
-              <EditIcon />
-            </Button>
-
-            <AlertDialog>
-              <AlertDialogTrigger render={<Button className="w-[31%]" variant="outline"><UserRoundX /></Button>}>
-                
-              </AlertDialogTrigger>
-
-              <AlertDialogContent className="w-[100%] ring-1 ring-secondary">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Você quer excluir este profissional?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription className="text-justify">
-                    Ao cancelar, você perderá o profissional e não poderá
-                    recuperá-lo. Essa ação é irreversível.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-
-                <AlertDialogFooter>
-                  <AlertDialogCancel variant="outline">
-                    Voltar
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    className="text-white"
-                    style={{ backgroundColor: "#dc2626" }}
-                    onClick={handleDelete}
-                  >
-                    Confirmar
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-
-            <Button className="w-[30%]" variant="outline">
-              <ShieldMinus/>
-            </Button>
-          </div>
-          <Button className="w-[100%] mt-2" variant="outline">
-            Serviços
-          </Button>
-        </div>
+        <ActionsProfessionals 
+          handleOpenDialog={handleOpenDialog}
+          openDeleteDialog={openDeleteDialog}
+          setOpenDeleteDialog={setOpenDeleteDialog}
+          handleDelete={handleDelete}
+          openDesactiveDialog={openDesactiveDialog}
+          setOpenDesactiveDialog={setOpenDesactiveDialog}
+          isAtivacted={professional.ativo}
+          handleDesactivated={handleDesactivated}
+          professionalId={professional.id}
+        />
       </CardContent>
 
       <Dialog
@@ -189,7 +200,7 @@ const ProfessionalItem = ({ professional, setProfessionals }: ProfessioanlItemPr
             <DialogTitle>Edite as informações</DialogTitle>
           </DialogHeader>
 
-          <FormDialog form={form} onSubmit={onSubmit} preview={preview} setPreview={setPreview}/>
+          <FormDialog form={form} onSubmit={onSubmit} preview={preview} setPreview={setPreview} submitLabel="Atualizar"/>
         </DialogContent>
       </Dialog>
 
