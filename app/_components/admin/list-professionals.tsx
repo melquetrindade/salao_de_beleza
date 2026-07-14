@@ -11,10 +11,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createProfessional } from "@/app/_actions/create-professional";
 import ProfessionalItem from "./professional-item";
 import { toast } from "sonner";
-import { professionalSchema, ProfessionalSchema } from "@/app/schema/professional-schema";
-import FormDialog from "./form-dialog";
-
-
+import {
+  professionalSchema,
+  ProfessionalSchema,
+} from "@/app/schema/professional-schema";
+import FormDialog from "./form-dialog-professional";
 
 const ListProfessionals = () => {
   const [professionals, setProfessionals] = useState<Profissional[]>([]);
@@ -47,8 +48,8 @@ const ListProfessionals = () => {
       toast.success("Profissional cadastrado com sucesso!", {
         style: {
           background: "#22c55e",
-          color: "#fff"
-        }
+          color: "#fff",
+        },
       });
     } catch (error) {
       if (error instanceof Error) {
@@ -56,7 +57,7 @@ const ListProfessionals = () => {
           style: {
             background: "#ef4444",
             color: "#fff",
-          }
+          },
         });
       } else {
         toast.error("Erro ao cadastrar profissional.");
@@ -92,7 +93,7 @@ const ListProfessionals = () => {
         <div className="grid grid-cols-2 gap-4 mb-10 ">
           {professionals.map((professional) => (
             <ProfessionalItem
-              key={professional.telefone}
+              key={professional.id}
               professional={professional}
               setProfessionals={setProfessionals}
             />
@@ -116,7 +117,13 @@ const ListProfessionals = () => {
             <DialogTitle>Preencha as informações</DialogTitle>
           </DialogHeader>
 
-          <FormDialog form={form} onSubmit={onSubmit} preview={preview} setPreview={setPreview} submitLabel="Cadastrar"/>
+          <FormDialog
+            form={form}
+            onSubmit={onSubmit}
+            preview={preview}
+            setPreview={setPreview}
+            submitLabel="Cadastrar"
+          />
         </DialogContent>
       </Dialog>
     </div>

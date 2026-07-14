@@ -14,6 +14,7 @@ export const createService = async (formData: FormData, professionalId: string) 
     // Converte "30,00" para "30.00" e depois para número
     const preco = Number(precoRaw.replace(",", "."));
 
+    // Ajustar para ele desconsiderar os espaços em branco
     const hasServico = await db.servico.findFirst({
         where: {
             nome: {

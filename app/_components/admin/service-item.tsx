@@ -1,67 +1,68 @@
-import { Profissional } from "@prisma/client";
-import { Card, CardContent } from "../ui/card";
-import Image from "next/image";
+"use client";
+
 import { ShieldCheckIcon, ShieldMinusIcon } from "lucide-react";
+import { Badge } from "../ui/badge";
+import { Card, CardContent } from "../ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import Image from "next/image";
+import { Servico } from "@prisma/client";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  professionalSchema,
-  ProfessionalSchema,
-} from "@/app/schema/professional-schema";
+import { serviceSchema, ServiceSchema } from "@/app/schema/service-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import FormDialog from "./form-dialog-professional";
-import { updateProfessional } from "@/app/_actions/update-professional";
-import { deleteProfessional } from "@/app/_actions/delete-professional";
-import { Badge } from "../ui/badge";
-import { desactivedProfessional } from "@/app/_actions/desactive-professional";
-import ActionsProfessionals from "./actions-professionals";
+import { updateService } from "@/app/_actions/update-service";
+import { deleteService } from "@/app/_actions/delete-service";
+import { desactivedService } from "@/app/_actions/desactive-service";
+import ActionsServices from "./actions-services";
+import FormDialogService from "./form-dialog-service";
 
-interface ProfessioanlItemProps {
-  professional: Profissional;
-  setProfessionals: Dispatch<SetStateAction<Profissional[]>>;
+interface ServiceItemProps {
+  service: Servico;
+  setServices: Dispatch<SetStateAction<Servico[]>>;
 }
 
-const ProfessionalItem = ({
-  professional,
-  setProfessionals,
-}: ProfessioanlItemProps) => {
+const ServiceItem = ({ service, setServices }: ServiceItemProps) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openDesactiveDialog, setOpenDesactiveDialog] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
 
-  const form = useForm<ProfessionalSchema>({
-    resolver: zodResolver(professionalSchema),
+  const form = useForm<ServiceSchema>({
+    resolver: zodResolver(serviceSchema),
     defaultValues: {
-      nome: professional.nome,
-      telefone: professional.telefone ?? "",
+      nome: service.nome,
+      preco: service.preco.toString(),
+      descricao: service.descricao ?? "",
+      tempo: service.tempo ?? "",
     },
   });
 
-  const onSubmit = async (data: ProfessionalSchema) => {
+  const onSubmit = async (data: ServiceSchema) => {
     try {
       const formData = new FormData();
 
       formData.append("nome", data.nome);
-      formData.append("telefone", data.telefone ?? "");
+      formData.append("preco", data.preco ?? 0);
+      formData.append("descricao", data.descricao ?? "");
+      formData.append("tempo", data.tempo ?? "");
       formData.append("imagem", data.imagem);
 
-      const upProfessional = await updateProfessional(
+      const upService = await updateService(
         formData,
-        professional.id,
-        professional.imgURLPublicId,
+        service.id,
+        service.imgURLPublicId,
+        service.profissionalId,
       );
-      setProfessionals((old) =>
-        old.map((p) => (p.id === professional.id ? upProfessional : p)),
+      setServices((old) =>
+        old.map((s) => (s.id === service.id ? upService as unknown as Servico : s)),
       );
 
       form.reset();
       setPreview(null);
       setOpenDialog(false);
 
-      toast.success("Profissional atualizado com sucesso!", {
+      toast.success("Serviço atualizado com sucesso!", {
         style: {
           background: "#22c55e",
           color: "#fff",
@@ -76,17 +77,22 @@ const ProfessionalItem = ({
           },
         });
       } else {
-        toast.error("Erro ao atualizar profissional.");
+        toast.error("Erro ao atualizar serviço.");
       }
     }
   };
 
   const handleDelete = async () => {
     try {
-      await deleteProfessional(professional.id, professional.imgURLPublicId);
-      setProfessionals((old) => old.filter((p) => p.id !== professional.id));
+      await deleteService(
+        service.id,
+        service.imgURLPublicId,
+        service.profissionalId,
+      );
+      setServices((old) => old.filter((s) => s.id !== service.id));
       setOpenDeleteDialog(false);
-      toast.success("Profissional excluído com sucesso!", {
+
+      toast.success("Serviço excluído com sucesso!", {
         style: {
           background: "#22c55e",
           color: "#fff",
@@ -101,7 +107,7 @@ const ProfessionalItem = ({
           },
         });
       } else {
-        toast.error("Erro ao excluir profissional.");
+        toast.error("Erro ao excluir serviço.");
       }
     }
   };
@@ -112,18 +118,16 @@ const ProfessionalItem = ({
 
   const handleDesactivated = async () => {
     try {
-      const action = !professional.ativo;
+      const action = !service.ativo;
 
-      await desactivedProfessional(professional.id, action);
-      setProfessionals((old) =>
-        old.map((p) =>
-          p.id === professional.id ? { ...p, ativo: action } : p,
-        ),
+      await desactivedService(service.id, action, service.profissionalId);
+      setServices((old) =>
+        old.map((s) => (s.id === service.id ? { ...s, ativo: action } : s)),
       );
       setOpenDesactiveDialog(false);
 
       toast.success(
-        `Profissional ${action ? "ativado" : "desativado"} com sucesso!`,
+        `Serviço ${action ? "ativado" : "desativado"} com sucesso!`,
         {
           style: {
             background: "#22c55e",
@@ -141,7 +145,7 @@ const ProfessionalItem = ({
         });
       } else {
         toast.error(
-          `Erro ao ${!professional.ativo ? "ativar" : "desativar"} profissional.`,
+          `Erro ao ${!service.ativo ? "ativar" : "desativar"} serviço.`,
         );
       }
     }
@@ -152,10 +156,10 @@ const ProfessionalItem = ({
       <CardContent>
         {/*Imagem */}
         <div className="relative h-[179px] w-full">
-          {professional.imgURL ? (
+          {service.imgURL ? (
             <Image
-              alt="Imagem do Profissional"
-              src={professional.imgURL}
+              alt="Imagem do Servico"
+              src={service.imgURL}
               fill
               priority
               className="object-cover rounded-2xl object-top"
@@ -165,7 +169,7 @@ const ProfessionalItem = ({
               Sem imagem
             </div>
           )}
-          {professional.ativo ? (
+          {service.ativo ? (
             <Badge className=" space-x-1 absolute rounded-md left-2 top-2 bg-green-500">
               <ShieldCheckIcon size={12} />
               <p className="text-xs font-semibold">Ativo</p>
@@ -180,19 +184,18 @@ const ProfessionalItem = ({
 
         {/*Texto */}
         <div className="py-3 px-1 flex justify-center">
-          <h3 className="truncate font-semibold">{professional.nome}</h3>
+          <h3 className="truncate font-semibold">{service.nome}</h3>
         </div>
 
-        <ActionsProfessionals
+        <ActionsServices
           handleOpenDialog={handleOpenDialog}
           openDeleteDialog={openDeleteDialog}
           setOpenDeleteDialog={setOpenDeleteDialog}
           handleDelete={handleDelete}
           openDesactiveDialog={openDesactiveDialog}
           setOpenDesactiveDialog={setOpenDesactiveDialog}
-          isAtivacted={professional.ativo}
+          isAtivacted={service.ativo}
           handleDesactivated={handleDesactivated}
-          professionalId={professional.id}
         />
       </CardContent>
 
@@ -212,7 +215,7 @@ const ProfessionalItem = ({
             <DialogTitle>Edite as informações</DialogTitle>
           </DialogHeader>
 
-          <FormDialog
+          <FormDialogService
             form={form}
             onSubmit={onSubmit}
             preview={preview}
@@ -225,4 +228,4 @@ const ProfessionalItem = ({
   );
 };
 
-export default ProfessionalItem;
+export default ServiceItem;
