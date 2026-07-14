@@ -1,3 +1,5 @@
+import Header from "@/app/_components/admin/header";
+import ListServices from "@/app/_components/admin/list-services";
 import { authOptions } from "@/app/_lib/auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -18,7 +20,11 @@ const ServicePage = async ({params}: ServicePageProps) => {
     const { id } = await params;
 
     return (
-        <h1>O ID do profissional é {id}</h1>
+        <div>
+            <Header/>
+            <ListServices id={id}/>
+        </div>
+        
     );
 }
  

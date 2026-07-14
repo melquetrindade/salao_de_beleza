@@ -23,8 +23,3 @@ const Profissionais = async () => {
 }
  
 export default Profissionais;
-
-{/* <h3>Cadastrar profissional</h3>
-            <div className="w-[20px] h-[40px]">
-                <Image alt="melque" src="https://glorious-sapphire-jnquc9mg.edgeone.dev/MAR_3338.jpg" width={20} height={40} priority/>
-            </div> */}

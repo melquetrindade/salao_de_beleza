@@ -134,7 +134,9 @@ model Servico {
 
   nome      String
   descricao String?
+  tempo String?
   imgURL    String?
+  imgURLPublicId  String?
   preco     Decimal @db.Decimal(10, 2)
   ativo     Boolean @default(true)
 

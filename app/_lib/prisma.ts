@@ -4,27 +4,31 @@ import { PrismaNeon } from "@prisma/adapter-neon"
 // Este código garante que a conecção com o
 // Banco de dados só seja feita uma uníca vez
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is required to initialize PrismaClient")
+const globalForPrisma = globalThis as unknown as {
+  cachedPrisma?: PrismaClient | undefined
 }
 
-const adapter = new PrismaNeon({
-  connectionString: process.env.DATABASE_URL,
-})
-
-declare global {
-  // eslint-disable-next-line no-var
-  var cachedPrisma: PrismaClient | undefined
-}
-
-let prisma: PrismaClient
-if (process.env.NODE_ENV === "production") {
-  prisma = new PrismaClient({ adapter })
-} else {
-  if (!global.cachedPrisma) {
-    global.cachedPrisma = new PrismaClient({ adapter })
+function createPrismaClient() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL is required to initialize PrismaClient")
   }
-  prisma = global.cachedPrisma
+
+  const adapter = new PrismaNeon({
+    connectionString: process.env.DATABASE_URL,
+  })
+
+  return new PrismaClient({ adapter })
 }
 
-export const db = prisma
+let db: PrismaClient
+
+if (process.env.NODE_ENV === "production") {
+  db = createPrismaClient()
+} else {
+  if (!globalForPrisma.cachedPrisma) {
+    globalForPrisma.cachedPrisma = createPrismaClient()
+  }
+  db = globalForPrisma.cachedPrisma
+}
+
+export { db }
