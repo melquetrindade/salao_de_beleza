@@ -57,7 +57,11 @@ const ProfessionalItem = ({
         old.map((p) => (p.id === professional.id ? upProfessional : p)),
       );
 
-      form.reset();
+      // Reseta o form com os dados atualizados
+      form.reset({
+        nome: upProfessional.nome,
+        telefone: upProfessional.telefone ?? ""
+      });
       setPreview(null);
       setOpenDialog(false);
 
@@ -148,7 +152,7 @@ const ProfessionalItem = ({
   };
 
   return (
-    <Card className="min-w-[167px] rounded-2xl border border-primary bg-secondary">
+    <Card className="min-w-[167px] rounded-2xl bg-secondary">
       <CardContent>
         {/*Imagem */}
         <div className="relative h-[179px] w-full">

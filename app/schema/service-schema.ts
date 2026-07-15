@@ -1,7 +1,10 @@
 import { z } from "zod";
 
 export const serviceSchema = z.object({
-  nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres."),
+  nome: z.string().transform((value) => value.trim().replace(/\s+/g, " "))
+    .refine((value) => value.length >= 3, {
+      message: "O nome deve ter pelo menos 3 caracteres.",
+    }),
 
   preco: z.string().min(1, "O preço é obrigatório."),
 

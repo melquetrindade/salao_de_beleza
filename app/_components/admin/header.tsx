@@ -8,18 +8,21 @@ import Link from "next/link";
 
 const Header = () => {
   return (
-    <Card className="rounded-none ring-0 bg-secondary">
-      <CardContent className="flex flex-row items-center justify-between pl-0">
+    <Card className="rounded-none ring-0 bg-primary pt-2 pb-2">
+      <CardContent className="flex flex-row items-center justify-between">
+        <div className="relative h-[40px] w-[80px]">
         <Link href="/admin/dashboard">
-            <Image
-            alt="Logo Salão de beleza"
-            src="/logo-copia.png"
-            height={28}
-            width={120}
-            priority
-            />
-        </Link>
         
+          <Image
+            alt="Logo Salão de beleza"
+            src="/logo3.png"
+            fill
+            priority
+          />
+        
+            
+        </Link>
+        </div>
 
         <Sheet>
           <SheetTrigger>

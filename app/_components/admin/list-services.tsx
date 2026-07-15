@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { createService } from "@/app/_actions/create-service";
 import ServiceItem from "./service-item";
 import FormDialogService from "./form-dialog-service";
+import { getProfessional, getProfessionals } from "@/app/_actions/get-professionals";
 
 interface ListServicesProps {
   id: string;
@@ -22,6 +23,7 @@ const ListServices = ({ id }: ListServicesProps) => {
   const [services, setServices] = useState<Servico[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [nameProfessional, setNameProfessional] = useState<string | null>()
 
   const form = useForm<ServiceSchema>({
     resolver: zodResolver(serviceSchema),
@@ -75,8 +77,14 @@ const ListServices = ({ id }: ListServicesProps) => {
     setServices(listServices as unknown as Servico[]);
   };
 
+  const getNameProfessional = async () => {
+    const professional = await getProfessional(id)
+    setNameProfessional(professional?.nome)
+  }
+
   useEffect(() => {
     fetchServices();
+    getNameProfessional()
   }, []);
 
   const handleOpenDialog = () => {
@@ -85,7 +93,13 @@ const ListServices = ({ id }: ListServicesProps) => {
 
   return (
     <div className="p-5">
-      <div className="flex items-center justify-end mb-7">
+      <div className="flex items-center justify-between mb-7">
+        {nameProfessional && (
+          <div>
+            <h1 className="font-semibold text-sm">Serviços de {nameProfessional}</h1>
+          </div>
+        )}
+        
         <Button onClick={handleOpenDialog}>
           <CirclePlusIcon />
           Cadastrar serviços

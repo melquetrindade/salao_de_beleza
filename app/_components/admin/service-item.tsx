@@ -58,7 +58,13 @@ const ServiceItem = ({ service, setServices }: ServiceItemProps) => {
         old.map((s) => (s.id === service.id ? upService as unknown as Servico : s)),
       );
 
-      form.reset();
+      // Reseta o form com os dados atualizados
+      form.reset({
+        nome: upService.nome,
+        preco: upService.preco.toString(),
+        descricao: upService.descricao ?? "",
+        tempo: upService.tempo ?? "",
+      });
       setPreview(null);
       setOpenDialog(false);
 
@@ -152,7 +158,7 @@ const ServiceItem = ({ service, setServices }: ServiceItemProps) => {
   };
 
   return (
-    <Card className="min-w-[167px] rounded-2xl border border-primary bg-secondary">
+    <Card className="min-w-[167px] rounded-2xl bg-secondary">
       <CardContent>
         {/*Imagem */}
         <div className="relative h-[179px] w-full">
@@ -204,7 +210,15 @@ const ServiceItem = ({ service, setServices }: ServiceItemProps) => {
         onOpenChange={(open) => {
           setOpenDialog(open);
 
-          if (!open) {
+          if (open) {
+            // Reseta o form com os dados atualizados do serviço
+            form.reset({
+              nome: service.nome,
+              preco: service.preco.toString(),
+              descricao: service.descricao ?? "",
+              tempo: service.tempo ?? "",
+            });
+          } else {
             form.reset();
             setPreview(null);
           }

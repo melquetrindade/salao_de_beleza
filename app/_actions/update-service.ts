@@ -24,7 +24,11 @@ export const updateService = async (
     // OBS: Ajustar para ele considerar além de excluir ele mesmo, o profissional. Pois, ele ainda pode pegar serviços com o mesmo nome de outro profissional
     const hasService = await db.servico.findFirst({
         where: {
-            nome: nome,
+            nome: {
+                equals: nome,
+                mode: "insensitive"
+            },
+            profissionalId: professionalId,
             NOT: {
                 id: serviceId
             }
