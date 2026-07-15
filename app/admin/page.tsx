@@ -4,12 +4,12 @@ import ButtonSignin from "../_components/admin/button-signin";
 
 export default function Admin() {
   return (
-    <div className="w-full min-h-screen items-center flex justify-center bg-gray-200">
+    <div className="w-full min-h-screen items-center flex justify-center bg-primary">
       <Card className="w-[80%]">
         <CardContent className="justify-center flex flex-col items-center py-4">
           <Image
             alt="logo"
-            src="/logo5.png"
+            src="/logo-copia.png"
             height={18}
             width={120}
             priority
@@ -20,7 +20,7 @@ export default function Admin() {
             Bem-vindo
           </h1>
 
-          <p className="font-semibold text-xs text-gray-400">
+          <p className="font-semibold text-xs text-primary">
             Faça login para acessar a área administrativa
           </p>
 

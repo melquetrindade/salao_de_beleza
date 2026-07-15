@@ -10,6 +10,7 @@ declare module "next-auth" {
       id: string;
       barbeariaId?: string;
       role: "admin" | "client";
+      adminRole?: string;
     };
   }
 
@@ -45,6 +46,7 @@ export const authOptions: AuthOptions = {
       if (administrador) {
         session.user.barbeariaId = administrador.barbeariaId;
         session.user.role = "admin";
+        session.user.adminRole = administrador.role;
       } else {
         session.user.role = "client";
       }
