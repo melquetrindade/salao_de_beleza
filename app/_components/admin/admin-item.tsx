@@ -101,19 +101,22 @@ const AdminItem = ({admin, setAdministrators}: AdminItemProps) => {
     };
 
     return (
-        <Card className="min-w-[167px] rounded-2xl bg-secondary">
-            <CardContent>
+        <Card className="w-full rounded-2xl bg-secondary">
+            <CardContent className="flex flex-row gap-2 w-full">
 
-                {/*Imagem */}
-                <div className="h-[179px] w-full flex items-center justify-center bg-muted rounded-2xl">
-                    <ShieldUserIcon size={48} className="text-muted-foreground" />
-                </div>
+                <div className="flex flex-col justify-start w-[75%]">
+                    {/*Imagem */}
+                    <div className="h-[40px] flex items-center justify-center rounded-2xl">
+                        <ShieldUserIcon size={38} className="text-primary" />
+                    </div>
 
-                {/*Texto */}
-                <div className="py-3 px-1 flex flex-col items-center gap-1">
-                    <h3 className="truncate font-semibold">{admin.nome}</h3>
-                    <p className="truncate text-sm text-muted-foreground">{admin.email}</p>
+                    {/*Texto */}
+                    <div className="py-3 px-1 flex flex-col items-start gap-1">
+                        <h3 className="truncate font-semibold">{admin.nome}</h3>
+                        <p className="truncate text-sm text-muted-foreground">{admin.email}</p>
+                    </div>
                 </div>
+                
 
                 <ActionsAdmin
                     handleOpenDialog={handleOpenDialog}

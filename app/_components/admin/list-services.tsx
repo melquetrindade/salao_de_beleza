@@ -100,7 +100,7 @@ const ListServices = ({ id }: ListServicesProps) => {
           </div>
         )}
         
-        <Button onClick={handleOpenDialog}>
+        <Button onClick={handleOpenDialog} variant="destructive">
           <CirclePlusIcon />
           Cadastrar serviços
         </Button>

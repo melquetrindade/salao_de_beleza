@@ -75,13 +75,13 @@ const ListAdmin = () => {
     return (
         <div className="p-5">
             <div className="flex items-center justify-end mb-7">
-                <Button onClick={handleOpenDialog}>
+                <Button onClick={handleOpenDialog} variant="destructive">
                     <CirclePlusIcon />
-                    Cadastrar serviços
+                    Cadastrar Administradores
                 </Button>
                 </div>
             {administrators.length > 0 ? (
-                <div className="grid grid-cols-2 gap-4 mb-10 ">
+                <div className="grid grid-cols-1 gap-4 mb-10 items-center w-full">
                     {administrators.map((admin) => (
                         <AdminItem
                             key={admin.id}

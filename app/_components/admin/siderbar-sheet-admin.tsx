@@ -16,17 +16,7 @@ import { getOwner } from "@/app/_actions/get-admin";
 
 const SiderbarSheetAdmin = () => {
   const { data } = useSession();
-  const [isOwner, setIsOwner] = useState<boolean>()
   const handleLogoutClick = () => signOut();
-
-  const fetchOwner = async () => {
-    const owner = await getOwner(data?.user.email!);
-    setIsOwner(owner);
-  };
-
-  useEffect(() => {
-    fetchOwner();
-  }, []);
 
   return (
     <SheetContent className="overflow-y-auto [&::-webkit-scrollbar]:hidden">
@@ -74,7 +64,7 @@ const SiderbarSheetAdmin = () => {
           <Link href="/admin/professionals">Profissionais</Link>
         </Button>
 
-        {isOwner && (
+        {data?.user.adminRole === 'OWNER' ? (
           <Button
             className="gap-2 justify-start"
             variant="ghost"
@@ -83,7 +73,7 @@ const SiderbarSheetAdmin = () => {
             <LockIcon />
             <Link href="/admin/owners">Administradores</Link>
           </Button>
-        )}
+        ) : null}
       </div>
 
       <div className="px-5 flex flex-col border-b border-solid pb-5">

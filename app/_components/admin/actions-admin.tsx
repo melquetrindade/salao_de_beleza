@@ -19,14 +19,14 @@ const ActionsAdmin = ({
     handleDelete
 }: ActionsAdminProps) => {
     return (
-        <div className="w-full">
-          <div className="flex flex-row justify-between gap-2 w-full mt-2 pr-1">
-            <Button className="w-[48%]" variant="outline" onClick={handleOpenDialog}>
+        <div className="w-[25%]">
+          <div className="flex flex-row justify-between gap-1 w-full h-full">
+            <Button className="h-full w-[48%] bg-yellow-300 text-white" variant={null} onClick={handleOpenDialog}>
               <EditIcon />
             </Button>
 
             <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
-              <AlertDialogTrigger render={<Button className="w-[48%]" variant="outline"><UserRoundX /></Button>}>
+              <AlertDialogTrigger render={<Button className="h-full w-[48%]" variant="default"><UserRoundX /></Button>}>
                 
               </AlertDialogTrigger>
 

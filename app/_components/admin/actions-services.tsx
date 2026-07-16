@@ -29,12 +29,12 @@ const ActionsServices = ({
     return (
         <div className="w-full">
           <div className="flex flex-row justify-between gap-2 w-full mt-2 pr-1">
-            <Button className="w-[32%]" variant="outline" onClick={handleOpenDialog}>
+            <Button className="w-[32%] bg-yellow-300 text-white" variant={null} onClick={handleOpenDialog}>
               <EditIcon />
             </Button>
 
             <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
-              <AlertDialogTrigger render={<Button className="w-[31%]" variant="outline"><UserRoundX /></Button>}>
+              <AlertDialogTrigger render={<Button className="w-[31%]"><UserRoundX /></Button>}>
                 
               </AlertDialogTrigger>
 
@@ -66,7 +66,7 @@ const ActionsServices = ({
 
             <AlertDialog open={openDesactiveDialog} onOpenChange={setOpenDesactiveDialog}>
               <AlertDialogTrigger render={
-                <Button className="w-[30%]" variant="outline">
+                <Button className="w-[30%] bg-blue-400 text-white" variant={null}>
                   <BanIcon/>
                 </Button>}>
               </AlertDialogTrigger>

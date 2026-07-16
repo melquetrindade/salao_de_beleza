@@ -81,7 +81,7 @@ const ListProfessionals = () => {
   return (
     <div className="p-5">
       <div className="flex items-center justify-end mb-7">
-        <Button onClick={handleOpenDialog}>
+        <Button onClick={handleOpenDialog} variant="destructive">
           <UserRoundPlusIcon />
           Cadastrar profissional
         </Button>
