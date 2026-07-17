@@ -2,6 +2,7 @@ import { Profissional } from "@prisma/client";
 import { Card, CardContent } from "../ui/card";
 import Image from "next/image";
 import { Button } from "../ui/button";
+import Link from "next/link";
 
 interface ProfessioanlItemProps {
   professional: Profissional;
@@ -38,7 +39,7 @@ const ProfessionalItem = ({professional}: ProfessioanlItemProps) => {
                 {/*Reservar */}
                 <div className="flex justify-center">
                     <Button size="xs">
-                        <p className="text-xs">Serviços</p>
+                        <Link href={`/services/${professional.id}`}><p className="text-xs">Serviços</p></Link>
                     </Button>
                 </div>
                 
