@@ -2,8 +2,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "./_lib/auth";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import SiderbarSheetClient from "./_components/client/siderbar-sheet-client";
 import Header from "./_components/client/header";
+import ContainerPageInitial from "./_components/client/container-page-initial";
+
+
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
@@ -13,7 +15,7 @@ export default async function Home() {
       <Header/>
 
       {/*Mensagem de boas-vindas */}
-      <div className="p-5">
+      <div className="p-5 border border-b border-gray-300">
         <h2 className="text-xl font-bold">
           Olá, {session?.user ? session.user.name : "bem-vindo"}!
         </h2>
@@ -27,6 +29,8 @@ export default async function Home() {
           </span>
         </p>
       </div>
+
+      <ContainerPageInitial/>
     </div>
   );
 }
