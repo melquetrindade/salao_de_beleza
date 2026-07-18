@@ -31,9 +31,11 @@ const ActionsProfessionals = ({
 }: ActionsProfessionalsProps) => {
     return (
         <div className="w-full">
+          
           <Button className="w-[100%]" variant="destructive">
-            Ver agenda
+            <Link href={`/admin/calendar/${professionalId}`}>Ver agenda</Link>
           </Button>
+
           <div className="flex flex-row justify-between gap-2 w-full mt-2 pr-1">
             <Button className="w-[32%] bg-yellow-300 text-white" variant={null} onClick={handleOpenDialog}>
               <EditIcon />
