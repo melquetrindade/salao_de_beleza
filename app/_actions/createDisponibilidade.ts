@@ -46,14 +46,22 @@ export const createDisponibilidade = async ({
   // Gera os slots
   const slots: { data: Date; horaInicio: Date; horaFim: Date }[] = [];
 
-  for (let minutos = inicioMin; minutos < fimMin; minutos += intervalo) {
-    // Verifica se está dentro do intervalo de almoço
-    if (
+  let minutos = inicioMin;
+
+  while (minutos < fimMin) {
+    const slotFimMin = minutos + intervalo;
+
+    // Verifica se o slot INVADE o intervalo de almoço
+    // Um slot invade se: início do slot < fim do intervalo E fim do slot > início do intervalo
+    const invadeIntervalo =
       inicioIntervaloMin !== null &&
       fimIntervaloMin !== null &&
-      minutos >= inicioIntervaloMin &&
-      minutos < fimIntervaloMin
-    ) {
+      minutos < fimIntervaloMin &&
+      slotFimMin > inicioIntervaloMin;
+
+    if (invadeIntervalo) {
+      // Pula para o final do intervalo e cria o próximo slot a partir daí
+      minutos = fimIntervaloMin!;
       continue;
     }
 
@@ -68,6 +76,8 @@ export const createDisponibilidade = async ({
       horaInicio: slotInicio,
       horaFim: slotFim,
     });
+
+    minutos += intervalo;
   }
 
   // Remove slots já existentes para esta data

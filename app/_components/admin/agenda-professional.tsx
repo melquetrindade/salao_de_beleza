@@ -1,12 +1,14 @@
 "use client"
 
 import { ptBR } from "date-fns/locale";
+import { format } from "date-fns";
 import { Calendar } from "../ui/calendar";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { getDisponibilidade } from "@/app/_actions/getDisponibilidade";
 import { Disponibilidade } from "@prisma/client";
+import { Card, CardContent } from "../ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { Field, FieldContent, FieldError, FieldGroup, FieldLabel } from "../ui/field";
+import { Field, FieldContent, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useForm } from "react-hook-form";
@@ -14,6 +16,7 @@ import { DisponibilidadeForm, disponibilidadeSchema } from "@/app/schema/disponi
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createDisponibilidade } from "@/app/_actions/createDisponibilidade";
 import { toast } from "sonner";
+import { ClockIcon } from "lucide-react";
 
 interface AgendaProfessionalProps {
     id: string
@@ -39,7 +42,6 @@ const AgendaProfessional = ({id}: AgendaProfessionalProps) => {
 
     useEffect(() => {
         const fetchDisponibilidade = async () => {
-            console.log("Troquei de data")
             if (!selectedDay) {
                 setDisponibilidade([]);
             return;
@@ -96,12 +98,6 @@ const AgendaProfessional = ({id}: AgendaProfessionalProps) => {
         }
     };
 
-    // const disponibilidade = useMemo(() => {
-    //     if(!selectedDay) return []
-
-    //     return getDisponibilidade({selectedDay: selectedDay, professionalId: id})
-    // }, [selectedDay])
-
     return (
         <div>
             <div className='px-5 pb-4 flex justify-center'>
@@ -128,9 +124,30 @@ const AgendaProfessional = ({id}: AgendaProfessionalProps) => {
             </div>
 
             {selectedDay && disponibilidade.length > 0 ? (
-                <h1>Já tem horários cadastrados para este dia.</h1>
+                <div className="px-5 flex flex-col items-center justify-center">
+                    <h2 className="text-sm font-semibold mb-3">
+                        Horários disponíveis em {format(selectedDay, "dd 'de' MMMM", { locale: ptBR })}
+                    </h2>
+                    <Card className="ring-0 border-secondary">
+                        <CardContent className="p-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                {disponibilidade.map((slot) => (
+                                    <div
+                                        key={slot.id}
+                                        className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm ${slot.status === "LIVRE" ? 'bg-green-400/80' : slot.status === "RESERVADO" ?'bg-primary/50' : 'bg-gray-400'}`}
+                                    >
+                                        <ClockIcon size={14} className="text-white" />
+                                        <span className="text-white">
+                                            {format(slot.horaInicio, "HH:mm")} - {format(slot.horaFim, "HH:mm")}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             ): selectedDay && (
-                <div>
+                <div className="flex justify-center">
                     <Button onClick={() => setOpenDialog(true)}>
                         Cadastrar Horários
                     </Button>
@@ -214,10 +231,3 @@ const AgendaProfessional = ({id}: AgendaProfessionalProps) => {
 }
  
 export default AgendaProfessional;
-
-// Agora você pode enviar para o banco
-        // await createDisponibilidade({
-        //     inicio,
-        //     fim,
-        //     intervalo: values.intervalo,
-        // });
