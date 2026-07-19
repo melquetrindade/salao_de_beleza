@@ -156,8 +156,8 @@ model Disponibilidade {
   id String @id @default(uuid())
 
   data       DateTime
-  horaInicio String
-  horaFim    String
+  horaInicio DateTime
+  horaFim    DateTime
   status     DisponibilidadeStatus @default(LIVRE)
 
   profissionalId String

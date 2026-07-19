@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/_lib/auth";
 import { redirect } from "next/navigation";
 import Header from "@/app/_components/admin/header";
+import AgendaProfessional from "@/app/_components/admin/agenda-professional";
 
 interface ServicePageProps{
     params: Promise<{
@@ -22,7 +23,7 @@ export default async function Calendar({params}: ServicePageProps) {
     <div>
       <Header />
 
-      <h2>Página de agenda de: {id}</h2>
+      <AgendaProfessional id={id}/>
     </div>
   );
 }
