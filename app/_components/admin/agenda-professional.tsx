@@ -138,6 +138,7 @@ const AgendaProfessional = ({id}: AgendaProfessionalProps) => {
             {selectedDay && disponibilidade.length > 0 ? (
                 <ShowSchedulesAgenda 
                     selectedDay={selectedDay}
+                    setDisponibilidade={setDisponibilidade}
                     disponibilidade={disponibilidade}
                 />
             ): selectedDay && (

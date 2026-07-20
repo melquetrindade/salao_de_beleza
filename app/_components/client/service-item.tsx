@@ -1,18 +1,23 @@
-import { Servico } from "@prisma/client";
+import { Servico, User } from "@prisma/client";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 import Image from "next/image"
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ClockIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { Dialog, DialogContent } from "../ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 import SignInDialog from "./sign-in-dialog";
-import { toast } from "sonner";
-import router from "next/router";
-import { set } from "date-fns";
 import { Calendar } from "../ui/calendar";
 import { ptBR } from "date-fns/locale";
+import { getUser } from "@/app/_actions/get-user";
+import { Field, FieldContent, FieldError, FieldGroup, FieldLabel } from "../ui/field";
+import { Input } from "../ui/input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { PhoneClientSchema, phoneClientSchema } from "@/app/schema/phone-client-schema";
+import { toast } from "sonner";
+import { createPhone } from "@/app/_actions/create-phone-client";
 
 interface ServiceItemProps {
     service: Servico
@@ -23,7 +28,57 @@ const ServiceItem = ({service}: ServiceItemProps) => {
     const [bookingSheetIsOpen, setBookingSheetIsOpen] = useState(false)
     const [signInDialogIsOpen, setSignInDialogIsOpen] = useState(false)
     const [selectedDay, setSelectedDay] = useState<Date | undefined>(undefined)
-    const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined)
+    const [client, setClient] = useState<User | null>()
+    const [signInDialogIsOpenPhone, setSignInDialogIsOpenPhone] = useState(false)
+    //const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined)
+
+    const form = useForm<PhoneClientSchema>({
+        resolver: zodResolver(phoneClientSchema),
+        defaultValues: {
+          telefone: "",
+        },
+    });
+
+    const onSubmit = async (dataPhone: PhoneClientSchema) => {
+        try {
+            if (!data?.user?.id) {
+                toast.error("Usuário não identificado.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("telefone", dataPhone.telefone ?? "");
+        
+            const phone = await createPhone(formData, data.user.id);
+            setClient((old) => {
+                if (!old) return old;
+
+                return {
+                    ...old,
+                    telefone: phone,
+                };
+            });
+        
+            form.reset();
+            toast.success("Telefone cadastrado com sucesso!", {
+                style: {
+                    background: "#22c55e",
+                    color: "#fff",
+                },
+            });
+        } catch (error) {
+            if (error instanceof Error) {
+                toast.error(error.message, {
+                style: {
+                    background: "#ef4444",
+                    color: "#fff",
+                },
+                });
+            } else {
+                toast.error("Erro ao cadastrar telefone.");
+            }
+        }
+    };
 
     const handleBookingSheetOpenChange = () => {
         setBookingSheetIsOpen(false)
@@ -34,61 +89,26 @@ const ServiceItem = ({service}: ServiceItemProps) => {
     }
 
     const handleBookingClick = () => {
-        if(data?.user){
+        if(data?.user && client?.telefone){
             return setBookingSheetIsOpen(true)
+        } else if(!data?.user) {
+            return setSignInDialogIsOpen(true)
+        } return setSignInDialogIsOpenPhone(true)
+        
+    }
+
+    const fetchUser = async (id: string) => {
+        const client = await getUser(id);
+        setClient(client);
+    };
+
+    useEffect(() => {
+        if(data?.user?.id) {
+            fetchUser(data.user.id)
         }
-        return setSignInDialogIsOpen(true)
-    }
+    }, [data?.user?.id])
 
-    /*
-    const handleCreateBooking = async () => {
-        // 1. Não exibir horários que já foram agendados
-        // 2. Salvar o agendamento para o usuário logado
-        // 3. Não exibir o botão de "Reservar" se o usuário não estiver logado
-        try{
-            if(!selectedDate){
-                return
-            }
-            await createBooking({
-                serviceId: service.id,
-                date: selectedDate,
-            })
-            handleBookingSheetOpenChange()
-            toast.success("Reserva criada com sucesso!", {
-                action: {
-                    label: "Ver agendamentos",
-                    onClick: () => router.push("/bookings")
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            toast.error("Error ao criar reserva!")
-        }
-    }
-    */
-
-    /*
-    const handleTimeSelect = (time: string | undefined) => {
-        setSelectedTime(time)
-    }
-    */
-
-    /*
-    const timeList = useMemo(() => {
-        if (!selectedDay) return []
-        return getTimeList({ bookings: dayBookings, selectedDay: selectedDay })
-    }, [dayBookings, selectedDay])
-    */
-
-    /*
-    const selectedDate = useMemo(() => {
-        if(!selectedDay || !selectedTime) return
-        return set(selectedDay, {
-            hours: Number(selectedTime?.split(":")[0]),
-            minutes: Number(selectedTime?.split(":")[1])
-        })
-    }, [selectedDay, selectedTime])
-    */
+    
     
     return (
         <>
@@ -166,11 +186,102 @@ const ServiceItem = ({service}: ServiceItemProps) => {
                     <SignInDialog/>
                 </DialogContent>
             </Dialog>
+
+            <Dialog open={signInDialogIsOpenPhone} onOpenChange={(open) => setSignInDialogIsOpenPhone(open)}>
+                <DialogContent className='w-[90%]'>
+                    <DialogHeader>
+                        <DialogTitle>Informe seu telefone</DialogTitle>
+                        <DialogDescription>
+                        Antes de reservar um serviço, cadastre seu telefone para contato!
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <FieldGroup>
+                            
+                            <Field>
+                                <FieldLabel htmlFor="telefone">Telefone</FieldLabel>
+                                <FieldContent>
+                                    <Input
+                                    id="telefone"
+                                    placeholder="(84) 99999-9999"
+                                    {...form.register("telefone")}
+                                    />
+
+                                    <FieldError>{form.formState.errors.telefone?.message}</FieldError>
+                                </FieldContent>
+                            </Field>
+
+                        </FieldGroup>
+
+                        <Button type="submit" className="w-full">
+                            Cadastrar telefone
+                        </Button>
+                    </form>
+
+                </DialogContent>
+            </Dialog>
         </>
     );
 }
  
 export default ServiceItem;
+
+
+
+
+
+
+
+/*
+    const handleCreateBooking = async () => {
+        // 1. Não exibir horários que já foram agendados
+        // 2. Salvar o agendamento para o usuário logado
+        // 3. Não exibir o botão de "Reservar" se o usuário não estiver logado
+        try{
+            if(!selectedDate){
+                return
+            }
+            await createBooking({
+                serviceId: service.id,
+                date: selectedDate,
+            })
+            handleBookingSheetOpenChange()
+            toast.success("Reserva criada com sucesso!", {
+                action: {
+                    label: "Ver agendamentos",
+                    onClick: () => router.push("/bookings")
+                }
+            })
+        } catch (error) {
+            console.log(error)
+            toast.error("Error ao criar reserva!")
+        }
+    }
+    */
+
+    /*
+    const handleTimeSelect = (time: string | undefined) => {
+        setSelectedTime(time)
+    }
+    */
+
+    /*
+    const timeList = useMemo(() => {
+        if (!selectedDay) return []
+        return getTimeList({ bookings: dayBookings, selectedDay: selectedDay })
+    }, [dayBookings, selectedDay])
+    */
+
+    /*
+    const selectedDate = useMemo(() => {
+        if(!selectedDay || !selectedTime) return
+        return set(selectedDay, {
+            hours: Number(selectedTime?.split(":")[0]),
+            minutes: Number(selectedTime?.split(":")[1])
+        })
+    }, [selectedDay, selectedTime])
+    */
 
 /*
 {selectedDay && (
