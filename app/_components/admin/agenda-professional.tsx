@@ -1,22 +1,34 @@
 "use client"
 
 import { ptBR } from "date-fns/locale";
-import { format } from "date-fns";
 import { Calendar } from "../ui/calendar";
 import { useEffect, useState } from "react";
 import { getDisponibilidade } from "@/app/_actions/getDisponibilidade";
-import { Disponibilidade } from "@prisma/client";
-import { Card, CardContent } from "../ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { Field, FieldContent, FieldGroup, FieldLabel } from "../ui/field";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import { Prisma } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { DisponibilidadeForm, disponibilidadeSchema } from "@/app/schema/disponibilidade-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createDisponibilidade } from "@/app/_actions/createDisponibilidade";
 import { toast } from "sonner";
-import { ClockIcon } from "lucide-react";
+import FormDialogAgenda from "./form-dialog-agenda";
+import ShowSchedulesAgenda from "./show-schedules-agenda";
+
+type DisponibilidadeComAgendamentos = Prisma.DisponibilidadeGetPayload<{
+  include: {
+    agendamentos: {
+      include: {
+        usuario: {
+          select: {
+            id: true;
+            name: true;
+            telefone: true;
+            email: true
+          };
+        };
+      };
+    };
+  };
+}>;
 
 interface AgendaProfessionalProps {
     id: string
@@ -24,7 +36,7 @@ interface AgendaProfessionalProps {
 
 const AgendaProfessional = ({id}: AgendaProfessionalProps) => {
     const [selectedDay, setSelectedDay] = useState<Date | undefined>(undefined)
-    const [disponibilidade, setDisponibilidade] = useState<Disponibilidade[]>([]);
+    const [disponibilidade, setDisponibilidade] = useState<DisponibilidadeComAgendamentos[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
 
     const handleDateSelect = (date: Date | undefined) => {
@@ -124,106 +136,17 @@ const AgendaProfessional = ({id}: AgendaProfessionalProps) => {
             </div>
 
             {selectedDay && disponibilidade.length > 0 ? (
-                <div className="px-5 flex flex-col items-center justify-center">
-                    <h2 className="text-sm font-semibold mb-3">
-                        Horários disponíveis em {format(selectedDay, "dd 'de' MMMM", { locale: ptBR })}
-                    </h2>
-                    <Card className="ring-0 border-secondary">
-                        <CardContent className="p-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                {disponibilidade.map((slot) => (
-                                    <div
-                                        key={slot.id}
-                                        className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm ${slot.status === "LIVRE" ? 'bg-green-400/80' : slot.status === "RESERVADO" ?'bg-primary/50' : 'bg-gray-400'}`}
-                                    >
-                                        <ClockIcon size={14} className="text-white" />
-                                        <span className="text-white">
-                                            {format(slot.horaInicio, "HH:mm")} - {format(slot.horaFim, "HH:mm")}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                <ShowSchedulesAgenda 
+                    selectedDay={selectedDay}
+                    disponibilidade={disponibilidade}
+                />
             ): selectedDay && (
-                <div className="flex justify-center">
-                    <Button onClick={() => setOpenDialog(true)}>
-                        Cadastrar Horários
-                    </Button>
-                    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                        <DialogContent className="w-[90%] max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden">
-                        <DialogHeader>
-                            <DialogTitle>Preencha as informações</DialogTitle>
-                        </DialogHeader>
-
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <FieldGroup>
-                                <Field>
-                                    <FieldLabel>Horário Inicial</FieldLabel>
-
-                                    <FieldContent>
-                                        <Input
-                                        type="time"
-                                        {...form.register("horaInicio")}
-                                        />
-                                    </FieldContent>
-                                </Field>
-
-                                <Field>
-                                    <FieldLabel>Horário Final</FieldLabel>
-
-                                    <FieldContent>
-                                        <Input
-                                        type="time"
-                                        {...form.register("horaFim")}
-                                        />
-                                    </FieldContent>
-                                </Field>
-
-                                <Field>
-                                    <FieldLabel>Intervalo (minutos)</FieldLabel>
-
-                                    <FieldContent>
-                                    <Input
-                                        type="number"
-                                        min={5}
-                                        step={5}
-                                        {...form.register("intervalo", {
-                                        valueAsNumber: true,
-                                        })}
-                                    />
-                                    </FieldContent>
-                                </Field>
-
-                                <Field>
-                                    <FieldLabel>Início do Intervalo (opcional)</FieldLabel>
-                                    <FieldContent>
-                                        <Input
-                                        type="time"
-                                        {...form.register("horaInicioIntervalo")}
-                                        />
-                                    </FieldContent>
-                                </Field>
-
-                                <Field>
-                                    <FieldLabel>Fim do Intervalo (opcional)</FieldLabel>
-                                    <FieldContent>
-                                        <Input
-                                        type="time"
-                                        {...form.register("horaFimIntervalo")}
-                                        />
-                                    </FieldContent>
-                                </Field>
-                            </FieldGroup>
-
-                            <Button type="submit" className="w-full">
-                                Gerar Horários
-                            </Button>
-                        </form>
-                        </DialogContent>
-                    </Dialog>
-                </div>
+                <FormDialogAgenda 
+                    onSubmit={onSubmit}
+                    setOpenDialog={setOpenDialog}
+                    form={form}
+                    openDialog={openDialog}
+                />
             )}
         </div>
         

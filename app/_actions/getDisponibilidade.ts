@@ -17,6 +17,20 @@ export const getDisponibilidade = async ({selectedDay, professionalId}: GetDispo
                 lte: endOfDay(selectedDay),
             }
         },
+        include: {
+            agendamentos: {
+                include: {
+                    usuario: {
+                        select: {
+                            id: true,
+                            name: true,
+                            telefone: true,
+                            email: true
+                        },
+                    },
+                },
+            },
+        },
         orderBy: {
             horaInicio: "asc"
         }
