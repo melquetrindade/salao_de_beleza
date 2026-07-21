@@ -41,6 +41,16 @@ export const authOptions: AuthOptions = {
     },
 
     async session({ session, token }) {
+      const user = await db.user.findUnique({
+        where: {
+          id: token.sub,
+        },
+      });
+
+      if (user) {
+        session.user.name = user.name ?? session.user.name;
+      }
+
       const administrador = await db.administrador.findUnique({
         where: {
           email: session.user.email!,

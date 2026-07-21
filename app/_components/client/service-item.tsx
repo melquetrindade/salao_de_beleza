@@ -98,7 +98,6 @@ const ServiceItem = ({service}: ServiceItemProps) => {
         } else if(!data?.user) {
             return setSignInDialogIsOpen(true)
         } return setSignInDialogIsOpenPhone(true)
-        
     }
 
     const fetchUser = async (id: string) => {
