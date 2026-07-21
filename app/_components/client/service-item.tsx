@@ -41,6 +41,8 @@ const ServiceItem = ({service}: ServiceItemProps) => {
 
     const onSubmit = async (dataPhone: PhoneClientSchema) => {
         try {
+
+            // Resolver este problema
             if (!data?.user?.id) {
                 toast.error("Usuário não identificado.");
                 return;
@@ -60,6 +62,8 @@ const ServiceItem = ({service}: ServiceItemProps) => {
             });
         
             form.reset();
+            setSignInDialogIsOpenPhone(false);
+            setBookingSheetIsOpen(true);
             toast.success("Telefone cadastrado com sucesso!", {
                 style: {
                     background: "#22c55e",

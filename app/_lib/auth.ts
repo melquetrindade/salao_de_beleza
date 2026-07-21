@@ -23,6 +23,9 @@ declare module "next-auth" {
 // passando ela como parâmetro da função getServerSession(authOptions)
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(db) as Adapter,
+  session: {
+    strategy: "jwt",
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
@@ -30,18 +33,21 @@ export const authOptions: AuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user }) {
-      // Permite qualquer usuário fazer login (clientes e administradores)
-      // A restrição de administrador será feita na rota /admin/dashboard
-      return true;
+    async jwt({ token, user }) {
+      if (user) {
+        token.sub = user.id;
+      }
+      return token;
     },
 
-    async session({ session }) {
+    async session({ session, token }) {
       const administrador = await db.administrador.findUnique({
         where: {
           email: session.user.email!,
         },
       });
+
+      session.user.id = token.sub as string;
 
       if (administrador) {
         session.user.barbeariaId = administrador.barbeariaId;
