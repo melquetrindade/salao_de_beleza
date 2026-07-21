@@ -75,7 +75,12 @@ const ContainerPageServices = ({id}: ContainerPageServicesProps) => {
                     </h2>
                     <div className="space-y-3">
                         {services.map((service) => (
-                            <ServiceItem key={service.id} service={service}/>
+                            <ServiceItem 
+                                key={service.id} 
+                                service={service} 
+                                professionalName={professional?.nome!}
+                                professionalId={professional?.id!}    
+                            />
                         ))}
                     </div>
                 </>

@@ -1,15 +1,16 @@
-import { Servico, User } from "@prisma/client";
+import { Disponibilidade, Servico, User } from "@prisma/client";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
+import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "../ui/sheet";
 import Image from "next/image"
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ClockIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 import SignInDialog from "./sign-in-dialog";
 import { Calendar } from "../ui/calendar";
 import { ptBR } from "date-fns/locale";
+import { format, set } from 'date-fns';
 import { getUser } from "@/app/_actions/get-user";
 import { Field, FieldContent, FieldError, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
@@ -18,19 +19,25 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PhoneClientSchema, phoneClientSchema } from "@/app/schema/phone-client-schema";
 import { toast } from "sonner";
 import { createPhone } from "@/app/_actions/create-phone-client";
+import { getTimeList } from "@/app/_actions/get-time-list";
+import { createAgendamento } from "@/app/_actions/create-agendamento";
 
 interface ServiceItemProps {
-    service: Servico
+    service: Servico,
+    professionalName: string,
+    professionalId: string
 }
 
-const ServiceItem = ({service}: ServiceItemProps) => {
+const ServiceItem = ({service, professionalName, professionalId}: ServiceItemProps) => {
     const {data} = useSession()
     const [bookingSheetIsOpen, setBookingSheetIsOpen] = useState(false)
     const [signInDialogIsOpen, setSignInDialogIsOpen] = useState(false)
     const [selectedDay, setSelectedDay] = useState<Date | undefined>(undefined)
     const [client, setClient] = useState<User | null>()
     const [signInDialogIsOpenPhone, setSignInDialogIsOpenPhone] = useState(false)
-    //const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined)
+    const [selectedTime, setSelectedTime] = useState<Disponibilidade | null>(null)
+    const [timeList, setTimeList] = useState<Disponibilidade[]>([])
+    const [isLoading, setIsLoading] = useState(false)
 
     const form = useForm<PhoneClientSchema>({
         resolver: zodResolver(phoneClientSchema),
@@ -41,8 +48,6 @@ const ServiceItem = ({service}: ServiceItemProps) => {
 
     const onSubmit = async (dataPhone: PhoneClientSchema) => {
         try {
-
-            // Resolver este problema
             if (!data?.user?.id) {
                 toast.error("Usuário não identificado.");
                 return;
@@ -86,10 +91,18 @@ const ServiceItem = ({service}: ServiceItemProps) => {
 
     const handleBookingSheetOpenChange = () => {
         setBookingSheetIsOpen(false)
+        setSelectedDay(undefined)
+        setSelectedTime(null)
+        setTimeList([])
     }
 
     const handleDateSelect = (date: Date | undefined) => {
         setSelectedDay(date)
+        setSelectedTime(null)
+    }
+
+    const handleTimeSelect = (time: Disponibilidade) => {
+        setSelectedTime(time)
     }
 
     const handleBookingClick = () => {
@@ -111,7 +124,52 @@ const ServiceItem = ({service}: ServiceItemProps) => {
         }
     }, [data?.user?.id])
 
-    
+    useEffect(() => {
+        const fetchTimeList = async () => {
+            if(!selectedDay) return
+            setIsLoading(true)
+            try {
+                const horarios = await getTimeList({ professionalId, selectedDay })
+                setTimeList(horarios)
+            } catch (error) {
+                console.error(error)
+                setTimeList([])
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchTimeList()
+    }, [selectedDay, professionalId])
+
+    const handleCreateAgendamento = async () => {
+        try{
+            if(!selectedDate){
+                return
+            }
+
+            setIsLoading(true)
+            await createAgendamento({
+                servicoId: service.id,
+                disponibilidadeId: selectedTime?.id!
+            })
+            handleBookingSheetOpenChange()
+            toast.success("Reserva criada com sucesso!")
+        } catch (error) {
+            console.log(error)
+            toast.error("Error ao criar reserva!")
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    const selectedDate = useMemo(() => {
+        if(!selectedDay || !selectedTime) return null
+        const horaInicio = new Date(selectedTime.horaInicio)
+        return set(selectedDay, {
+            hours: horaInicio.getHours(),
+            minutes: horaInicio.getMinutes(),
+        })
+    }, [selectedDay, selectedTime])
     
     return (
         <>
@@ -175,7 +233,77 @@ const ServiceItem = ({service}: ServiceItemProps) => {
                                                 />
                                             </div>
                                         </div>
+
+                                        {selectedDay && (
+                                            <div className='py-4 border border-solid px-5 flex overflow-x-auto [&::-webkit-scrollbar]:hidden gap-2'>
+                                                {isLoading ? (
+                                                    <p className='text-xs'>Carregando horários...</p>
+                                                ) : timeList.length > 0 ? timeList.map((time) => (
+                                                    <Button 
+                                                        key={time.id}
+                                                        variant={selectedTime?.id === time.id ? 'default' : 'outline'}
+                                                        className='rounded-full'
+                                                        onClick={() => handleTimeSelect(time)}
+                                                    >
+                                                    {format(new Date(time.horaInicio), "HH:mm")}
+                                                    </Button>
+                                                )) : 
+                                                    <p className='text-xs'>Não há horários disponíveis para este dia.</p>
+                                                }
+                                            </div>
+                                        )}
+
+                                        {selectedDate && (
+                                            <div className='p-5'>
+                                                <Card>
+                                                    <CardContent className='p-3 space-y-3'>
+                                                        <div className='flex items-center justify-between'>
+                                                            <h2 className='font-bold'>{service.nome}</h2>
+                                                            <p className='text-sm font-bold'>
+                                                                {Intl.NumberFormat("pt-BR", {
+                                                                    style: "currency",
+                                                                    currency: "BRL",
+                                                                }).format(Number(service.preco))}
+                                                            </p>
+                                                        </div>
+
+                                                        <div className='flex items-center justify-between'>
+                                                            <h2 className='text-sm text-gray-400'>Data</h2>
+                                                            <p className='text-sm'>
+                                                                {format(selectedDate, "d 'de' MMMM", {
+                                                                    locale: ptBR,
+                                                                })}
+                                                            </p>
+                                                        </div>
+
+                                                        <div className='flex items-center justify-between'>
+                                                            <h2 className='text-sm text-gray-400'>Horário</h2>
+                                                            <p className='text-sm'>
+                                                                {format(selectedDate, "HH:mm", {
+                                                                    locale: ptBR,
+                                                                })}
+                                                            </p>
+                                                        </div>
+
+                                                        <div className='flex items-center justify-between'>
+                                                            <h2 className='text-sm text-gray-400'>Profissional</h2>
+                                                            <p className='text-sm'>
+                                                                {professionalName}
+                                                            </p>
+                                                        </div>
+
+                                                        
+                                                    </CardContent>
+                                                </Card>
+                                            </div>
+                                        )}
+
                                     </div>
+                                    <SheetFooter className='px-5'>
+                                        <Button disabled={!selectedDay || !selectedTime || isLoading} onClick={handleCreateAgendamento}>
+                                            {isLoading ? "Confirmando..." : "Confirmar"}
+                                        </Button>
+                                    </SheetFooter>
                                 </SheetContent>
                             </Sheet>
                             
@@ -229,85 +357,3 @@ const ServiceItem = ({service}: ServiceItemProps) => {
 }
  
 export default ServiceItem;
-
-
-
-
-
-
-
-/*
-    const handleCreateBooking = async () => {
-        // 1. Não exibir horários que já foram agendados
-        // 2. Salvar o agendamento para o usuário logado
-        // 3. Não exibir o botão de "Reservar" se o usuário não estiver logado
-        try{
-            if(!selectedDate){
-                return
-            }
-            await createBooking({
-                serviceId: service.id,
-                date: selectedDate,
-            })
-            handleBookingSheetOpenChange()
-            toast.success("Reserva criada com sucesso!", {
-                action: {
-                    label: "Ver agendamentos",
-                    onClick: () => router.push("/bookings")
-                }
-            })
-        } catch (error) {
-            console.log(error)
-            toast.error("Error ao criar reserva!")
-        }
-    }
-    */
-
-    /*
-    const handleTimeSelect = (time: string | undefined) => {
-        setSelectedTime(time)
-    }
-    */
-
-    /*
-    const timeList = useMemo(() => {
-        if (!selectedDay) return []
-        return getTimeList({ bookings: dayBookings, selectedDay: selectedDay })
-    }, [dayBookings, selectedDay])
-    */
-
-    /*
-    const selectedDate = useMemo(() => {
-        if(!selectedDay || !selectedTime) return
-        return set(selectedDay, {
-            hours: Number(selectedTime?.split(":")[0]),
-            minutes: Number(selectedTime?.split(":")[1])
-        })
-    }, [selectedDay, selectedTime])
-    */
-
-/*
-{selectedDay && (
-                                            <div className='py-4 border border-solid px-5 flex overflow-x-auto [&::-webkit-scrollbar]:hidden gap-2'>
-                                                {timeList.length > 0 ? timeList.map((time) => (
-                                                    <Button 
-                                                        key={time}
-                                                        variant={selectedTime === time ? 'default' : 'outline'}
-                                                        className='rounded-full'
-                                                        onClick={() => handleTimeSelect(time)}
-                                                    >{time}</Button>
-                                                )) : 
-                                                    <p className='text-xs'>Não há horários disponíveis para este dia.</p>
-                                                }
-                                            </div>
-                                        )}
-                                        
-                                        {selectedDate && (
-                                            <div className='p-5'>
-                                                <BookingSummary 
-                                                    service={service} 
-                                                    barbershop={barbershop} 
-                                                    selectedDate={selectedDate} />
-                                            </div>
-                                        )}
-*/
