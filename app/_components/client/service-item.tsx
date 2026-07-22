@@ -4,7 +4,7 @@ import { Card, CardContent } from "../ui/card";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "../ui/sheet";
 import Image from "next/image"
 import { useEffect, useMemo, useState } from "react";
-import { ClockIcon } from "lucide-react";
+import { ClockIcon, Loader2Icon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 import SignInDialog from "./sign-in-dialog";
@@ -38,6 +38,7 @@ const ServiceItem = ({service, professionalName, professionalId}: ServiceItemPro
     const [selectedTime, setSelectedTime] = useState<Disponibilidade | null>(null)
     const [timeList, setTimeList] = useState<Disponibilidade[]>([])
     const [isLoading, setIsLoading] = useState(false)
+    const [isLoadingConfirm, setIsLoadingConfirm] = useState(false)
 
     const form = useForm<PhoneClientSchema>({
         resolver: zodResolver(phoneClientSchema),
@@ -124,6 +125,8 @@ const ServiceItem = ({service, professionalName, professionalId}: ServiceItemPro
         }
     }, [data?.user?.id])
 
+
+    // Ajustar o getTime para retornar apenas horários disponíveis e que não estejam no passado
     useEffect(() => {
         const fetchTimeList = async () => {
             if(!selectedDay) return
@@ -147,18 +150,28 @@ const ServiceItem = ({service, professionalName, professionalId}: ServiceItemPro
                 return
             }
 
-            setIsLoading(true)
+            setIsLoadingConfirm(true)
             await createAgendamento({
                 servicoId: service.id,
                 disponibilidadeId: selectedTime?.id!
             })
             handleBookingSheetOpenChange()
-            toast.success("Reserva criada com sucesso!")
+            toast.success("Reserva criada com sucesso!", {
+                style: {
+                    background: "#22c55e",
+                    color: "#fff",
+                },
+            })
         } catch (error) {
             console.log(error)
-            toast.error("Error ao criar reserva!")
+            toast.error("Error ao criar reserva!", {
+                style: {
+                    background: "#ef4444",
+                    color: "#fff",
+                },
+            })
         } finally {
-            setIsLoading(false)
+            setIsLoadingConfirm(false)
         }
     }
 
@@ -234,11 +247,14 @@ const ServiceItem = ({service, professionalName, professionalId}: ServiceItemPro
                                             </div>
                                         </div>
 
-                                        {selectedDay && (
+                                        {selectedDay && isLoading ? (
+                                            <div className="flex flex-col items-center">
+                                                <Loader2Icon className="size-4 animate-spin" />
+                                                <p className='text-xs'>Carregando horários</p>
+                                            </div>
+                                        ) : timeList.length > 0 ? (
                                             <div className='py-4 border border-solid px-5 flex overflow-x-auto [&::-webkit-scrollbar]:hidden gap-2'>
-                                                {isLoading ? (
-                                                    <p className='text-xs'>Carregando horários...</p>
-                                                ) : timeList.length > 0 ? timeList.map((time) => (
+                                                {timeList.map((time) => (
                                                     <Button 
                                                         key={time.id}
                                                         variant={selectedTime?.id === time.id ? 'default' : 'outline'}
@@ -247,11 +263,13 @@ const ServiceItem = ({service, professionalName, professionalId}: ServiceItemPro
                                                     >
                                                     {format(new Date(time.horaInicio), "HH:mm")}
                                                     </Button>
-                                                )) : 
-                                                    <p className='text-xs'>Não há horários disponíveis para este dia.</p>
-                                                }
+                                                ))}
                                             </div>
-                                        )}
+                                        ) : 
+                                        <div className="flex justify-center">
+                                            <p className='text-xs'>Não há horários disponíveis para este dia.</p>
+                                        </div>}
+                                       
 
                                         {selectedDate && (
                                             <div className='p-5'>
@@ -300,8 +318,11 @@ const ServiceItem = ({service, professionalName, professionalId}: ServiceItemPro
 
                                     </div>
                                     <SheetFooter className='px-5'>
-                                        <Button disabled={!selectedDay || !selectedTime || isLoading} onClick={handleCreateAgendamento}>
-                                            {isLoading ? "Confirmando..." : "Confirmar"}
+                                        <Button disabled={!selectedDay || !selectedTime || isLoadingConfirm} onClick={handleCreateAgendamento}>
+                                            {isLoadingConfirm ? 
+                                                <Loader2Icon className="size-4 animate-spin" /> 
+                                            : 
+                                                "Confirmar"}
                                         </Button>
                                     </SheetFooter>
                                 </SheetContent>

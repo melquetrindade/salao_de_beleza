@@ -9,7 +9,7 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
-import { CalendarIcon, FileUserIcon, HomeIcon, LogInIcon, LogOutIcon } from "lucide-react";
+import { CalendarIcon, FileUserIcon, HomeIcon, LogInIcon, LogOutIcon, Loader2Icon } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import Link from "next/link";
 import SignInDialog from "./sign-in-dialog";
@@ -29,6 +29,7 @@ const SiderbarSheetClient = () => {
   const handleLogoutClick = () => signOut();
   const [dialogIsOpenPerfil, setDialogIsOpenPerfil] = useState(false)
   const [client, setClient] = useState<User | null>()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<PerfilUserSchema>({
     resolver: zodResolver(perfilUserSchema),
@@ -44,6 +45,8 @@ const SiderbarSheetClient = () => {
         toast.error("Usuário não identificado.");
         return;
       }
+
+      setIsSubmitting(true)
 
       const formData = new FormData();
       formData.append("telefone", dataPerfil.telefone ?? "");
@@ -71,6 +74,8 @@ const SiderbarSheetClient = () => {
         } else {
           toast.error("Erro ao atualizar perfil.");
         }
+    } finally {
+        setIsSubmitting(false)
     }
   };
 
@@ -210,8 +215,12 @@ const SiderbarSheetClient = () => {
 
                 </FieldGroup>
 
-                <Button type="submit" className="w-full">
-                    Atualizar
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                        <Loader2Icon className="size-4 animate-spin" />
+                    ) : (
+                        "Atualizar"
+                    )}
                 </Button>
             </form>
 
