@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "../ui/button";
-import { EditIcon, UserRoundX } from "lucide-react";
+import { EditIcon, Loader2Icon, UserRoundX } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { Dispatch, SetStateAction } from "react";
 
@@ -10,13 +10,15 @@ interface ActionsAdminProps {
     openDeleteDialog: boolean;
     setOpenDeleteDialog: Dispatch<SetStateAction<boolean>>;
     handleDelete: () => Promise<void>
+    isLoadingDeleteAdmin: boolean
 }
 
 const ActionsAdmin = ({
     handleOpenDialog,
     openDeleteDialog,
     setOpenDeleteDialog,
-    handleDelete
+    handleDelete,
+    isLoadingDeleteAdmin
 }: ActionsAdminProps) => {
     return (
         <div className="w-[25%]">
@@ -50,7 +52,9 @@ const ActionsAdmin = ({
                     style={{ backgroundColor: "#dc2626" }}
                     onClick={handleDelete}
                   >
-                    Confirmar
+                    {isLoadingDeleteAdmin ? 
+                      <Loader2Icon className="size-4 animate-spin" /> 
+                    : 'Confirmar'}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

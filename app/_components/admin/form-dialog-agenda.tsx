@@ -7,19 +7,22 @@ import { Input } from "../ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { Dispatch, SetStateAction } from "react";
 import { DisponibilidadeForm } from "@/app/schema/disponibilidade-schema";
+import { Loader2Icon } from "lucide-react";
 
 interface FormDialogAgendaProps {
     setOpenDialog: Dispatch<SetStateAction<boolean>>
     openDialog: boolean
     form: UseFormReturn<DisponibilidadeForm>
     onSubmit: (values: DisponibilidadeForm) => Promise<void>
+    isLoadingCadastraDispo: boolean
 }
 
 const FormDialogAgenda = ({
     setOpenDialog,
     openDialog,
     form,
-    onSubmit
+    onSubmit,
+    isLoadingCadastraDispo
 }: FormDialogAgendaProps) => {
     return (
         <div className="flex justify-center">
@@ -93,7 +96,9 @@ const FormDialogAgenda = ({
                     </FieldGroup>
 
                     <Button type="submit" className="w-full">
-                        Gerar Horários
+                        {isLoadingCadastraDispo ? 
+                            <Loader2Icon className="size-4 animate-spin"/>
+                        : "Gerar Horários"}
                     </Button>
                 </form>
                 </DialogContent>

@@ -5,14 +5,16 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { UseFormReturn } from "react-hook-form";
 import { AdminSchema } from "@/app/schema/admin-schema";
+import { Loader2Icon } from "lucide-react";
 
 interface FormDialogAdminProps {
     form: UseFormReturn<AdminSchema>;
     onSubmit: (data: AdminSchema) => Promise<void>;
     submitLabel?: string;
+    isLoadingCadastraAdmin: boolean
 }
 
-const FormDialogAdmin = ({ form, onSubmit, submitLabel = "Cadastrar" }: FormDialogAdminProps) => {
+const FormDialogAdmin = ({ form, onSubmit, submitLabel = "Cadastrar", isLoadingCadastraAdmin }: FormDialogAdminProps) => {
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FieldGroup>
@@ -47,7 +49,7 @@ const FormDialogAdmin = ({ form, onSubmit, submitLabel = "Cadastrar" }: FormDial
 
             </FieldGroup>
             <Button type="submit" className="w-full">
-                {submitLabel}
+                {isLoadingCadastraAdmin ? <Loader2Icon className="size-4 animate-spin" /> : `${submitLabel}`}
             </Button>
         </form>
     );

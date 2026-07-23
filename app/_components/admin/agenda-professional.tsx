@@ -12,6 +12,8 @@ import { createDisponibilidade } from "@/app/_actions/createDisponibilidade";
 import { toast } from "sonner";
 import FormDialogAgenda from "./form-dialog-agenda";
 import ShowSchedulesAgenda from "./show-schedules-agenda";
+import { Skeleton } from "../ui/skeleton";
+import { Loader2Icon } from "lucide-react";
 
 type DisponibilidadeComAgendamentos = Prisma.DisponibilidadeGetPayload<{
   include: {
@@ -38,6 +40,8 @@ const AgendaProfessional = ({id}: AgendaProfessionalProps) => {
     const [selectedDay, setSelectedDay] = useState<Date | undefined>(undefined)
     const [disponibilidade, setDisponibilidade] = useState<DisponibilidadeComAgendamentos[]>([]);
     const [openDialog, setOpenDialog] = useState(false);
+    const [loading, setLoading] = useState(false)
+    const [isLoadingCadastraDispo, setIsLoadingCadastraDispo] = useState(false)
 
     const handleDateSelect = (date: Date | undefined) => {
         setSelectedDay(date)
@@ -52,26 +56,33 @@ const AgendaProfessional = ({id}: AgendaProfessionalProps) => {
         },
     });
 
-    useEffect(() => {
-        const fetchDisponibilidade = async () => {
+    const fetchData = async () => {
+        try {
+            setLoading(true)
             if (!selectedDay) {
                 setDisponibilidade([]);
-            return;
+                return;
             }
 
-            const data = await getDisponibilidade({
-                selectedDay,
-                professionalId: id,
-            });
-            setDisponibilidade(data);
-        };
-        fetchDisponibilidade();
+            const [data] = await Promise.all([
+                getDisponibilidade({selectedDay, professionalId: id})
+            ])
+            setDisponibilidade(data)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchData()
     }, [selectedDay, id]);
 
+    // Loading
     const onSubmit = async (values: DisponibilidadeForm) => {
         if (!selectedDay) return;
 
         try {
+            setIsLoadingCadastraDispo(true)
             await createDisponibilidade({
                 professionalId: id,
                 selectedDay,
@@ -107,6 +118,8 @@ const AgendaProfessional = ({id}: AgendaProfessionalProps) => {
             } else {
                 toast.error("Erro ao gerar horários.");
             }
+        } finally {
+            setIsLoadingCadastraDispo(false)
         }
     };
 
@@ -135,11 +148,17 @@ const AgendaProfessional = ({id}: AgendaProfessionalProps) => {
                 </div>
             </div>
 
-            {selectedDay && disponibilidade.length > 0 ? (
+            {loading ? (
+                <div className="flex flex-col items-center gap-3">
+                    <h3 className="font-semibold">Carregando horários</h3>
+                    <Loader2Icon className="size-4 animate-spin"/> 
+                </div>
+            ) : selectedDay && disponibilidade.length > 0 ? (
                 <ShowSchedulesAgenda 
                     selectedDay={selectedDay}
                     setDisponibilidade={setDisponibilidade}
                     disponibilidade={disponibilidade}
+                    professionalId={id}
                 />
             ): selectedDay && (
                 <FormDialogAgenda 
@@ -147,6 +166,7 @@ const AgendaProfessional = ({id}: AgendaProfessionalProps) => {
                     setOpenDialog={setOpenDialog}
                     form={form}
                     openDialog={openDialog}
+                    isLoadingCadastraDispo={isLoadingCadastraDispo}
                 />
             )}
         </div>

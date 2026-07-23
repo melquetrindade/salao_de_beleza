@@ -13,6 +13,7 @@ import { updateAdmin } from "@/app/_actions/update-admin";
 import { deleteAdmin } from "@/app/_actions/delete-admin";
 import ActionsAdmin from "./actions-admin";
 import FormDialogAdmin from "./form-dialog-admin";
+import { finalize } from "zod/v4/core";
 
 interface AdminItemProps {
     admin: Administrador,
@@ -22,6 +23,8 @@ interface AdminItemProps {
 const AdminItem = ({admin, setAdministrators}: AdminItemProps) => {
     const [openDialog, setOpenDialog] = useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [isLoadingUpdateAdmin, setIsLoadingUpdateAdmin] = useState(false)
+    const [isLoadingDeleteAdmin, setIsLoadingDeleteAdmin] = useState(false)
 
     const form = useForm<AdminSchema>({
         resolver: zodResolver(adminSchema),
@@ -33,6 +36,7 @@ const AdminItem = ({admin, setAdministrators}: AdminItemProps) => {
 
     const onSubmit = async (data: AdminSchema) => {
         try {
+            setIsLoadingUpdateAdmin(true)
             const formData = new FormData();
         
             formData.append("nome", data.nome);
@@ -67,11 +71,14 @@ const AdminItem = ({admin, setAdministrators}: AdminItemProps) => {
             } else {
                 toast.error("Erro ao atualizar administrador.");
             }
+        } finally {
+            setIsLoadingUpdateAdmin(false)
         }
     };
 
     const handleDelete = async () => {
         try {
+            setIsLoadingDeleteAdmin(true)
             await deleteAdmin(admin.id);
             setAdministrators((old) => old.filter((a) => a.id !== admin.id));
 
@@ -93,6 +100,8 @@ const AdminItem = ({admin, setAdministrators}: AdminItemProps) => {
             } else {
                 toast.error("Erro ao excluir administrador.");
             }
+        } finally{
+            setIsLoadingDeleteAdmin(false)
         }
     };
 
@@ -123,6 +132,7 @@ const AdminItem = ({admin, setAdministrators}: AdminItemProps) => {
                     openDeleteDialog={openDeleteDialog}
                     setOpenDeleteDialog={setOpenDeleteDialog}
                     handleDelete={handleDelete}
+                    isLoadingDeleteAdmin={isLoadingDeleteAdmin}
                 />
             </CardContent>
 
@@ -145,6 +155,7 @@ const AdminItem = ({admin, setAdministrators}: AdminItemProps) => {
                     form={form}
                     onSubmit={onSubmit}
                     submitLabel="Atualizar"
+                    isLoadingCadastraAdmin={isLoadingUpdateAdmin}
                 />
                 </DialogContent>
             </Dialog>

@@ -31,41 +31,39 @@ const ListAdmin = () => {
 
     const onSubmit = async (data: AdminSchema) => {
         try {
-          const formData = new FormData();
-    
-          formData.append("nome", data.nome);
-          formData.append("email", data.email);
-    
-          const newAdmin = await createAdmin(formData);
-          setAdministrators((old) => [...old, newAdmin as unknown as Administrador]);
-    
-          form.reset();
-          setOpenDialog(false);
-    
-          toast.success("Administrador cadastrado com sucesso!", {
-            style: {
-              background: "#22c55e",
-              color: "#fff",
-            },
-          });
-        } catch (error) {
-          if (error instanceof Error) {
-            toast.error(error.message, {
-              style: {
-                background: "#ef4444",
+            setIsLoadingCadastraAdmin(true)
+            const formData = new FormData();
+        
+            formData.append("nome", data.nome);
+            formData.append("email", data.email);
+        
+            const newAdmin = await createAdmin(formData);
+            setAdministrators((old) => [...old, newAdmin as unknown as Administrador]);
+        
+            form.reset();
+            setOpenDialog(false);
+        
+            toast.success("Administrador cadastrado com sucesso!", {
+                style: {
+                background: "#22c55e",
                 color: "#fff",
-              },
+                },
             });
+        } catch (error) {
+            if (error instanceof Error) {
+                toast.error(error.message, {
+                style: {
+                    background: "#ef4444",
+                    color: "#fff",
+                },
+                });
           } else {
-            toast.error("Erro ao cadastrar administrador.");
+                toast.error("Erro ao cadastrar administrador.");
           }
+        } finally {
+            setIsLoadingCadastraAdmin(false)
         }
     };
-
-    // const fetchAdministrators = async () => {
-    //     const listAdministrators = await getAdmin();
-    //     setAdministrators(listAdministrators)
-    // }
 
     const fetchData = async () => {
         setLoading(true)
@@ -80,7 +78,6 @@ const ListAdmin = () => {
     }
 
     useEffect(() => {
-        //fetchAdministrators();
         fetchData()
     }, []);
 
@@ -148,6 +145,7 @@ const ListAdmin = () => {
                         form={form}
                         onSubmit={onSubmit}
                         submitLabel="Cadastrar"
+                        isLoadingCadastraAdmin={isLoadingCadastraAdmin}
                     />
                 </DialogContent>
             </Dialog>
@@ -156,14 +154,3 @@ const ListAdmin = () => {
 }
  
 export default ListAdmin;
-
-/*
-<div className="grid grid-cols-1 gap-4 mb-10 items-center w-full">
-                    {administrators.map((admin) => (
-                        <AdminItem
-                            key={admin.id}
-                            admin={admin}
-                            setAdministrators={setAdministrators}
-                        />
-                    ))}
-                </div> */

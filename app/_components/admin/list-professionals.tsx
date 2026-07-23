@@ -72,8 +72,8 @@ const ListProfessionals = () => {
   };
 
   const fetchData = async () => {
-    setLoading(true)
     try {
+        setLoading(true)
         const [listProfessionals] = await Promise.all([
             getProfessionals()
         ])

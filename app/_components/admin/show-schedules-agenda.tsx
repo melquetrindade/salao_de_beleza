@@ -1,6 +1,6 @@
 "use client"
 
-import { ClockIcon } from "lucide-react";
+import { ClockIcon, Loader2Icon } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -10,6 +10,13 @@ import { Button } from "../ui/button";
 import { blockTime, unlockTime } from "@/app/_actions/handle-time";
 import { Dispatch, SetStateAction, useState } from "react";
 import { toast } from "sonner";
+import { Field, FieldContent, FieldGroup, FieldLabel } from "../ui/field";
+import { Input } from "../ui/input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AddHorarioForm, addHorarioSchema } from "@/app/schema/add-horario-schema";
+import { addDisponibilidade } from "@/app/_actions/addDisponibilidade";
+import { getDisponibilidade } from "@/app/_actions/getDisponibilidade";
 
 type DisponibilidadeComAgendamentos = Prisma.DisponibilidadeGetPayload<{
   include: {
@@ -32,10 +39,68 @@ interface ShowSchedulesAgendaProps {
     selectedDay: Date | undefined
     setDisponibilidade: Dispatch<SetStateAction<DisponibilidadeComAgendamentos[]>>
     disponibilidade: DisponibilidadeComAgendamentos[]
+    professionalId: string
 }
 
-const ShowSchedulesAgenda = ({selectedDay, disponibilidade, setDisponibilidade}: ShowSchedulesAgendaProps) => {
+const ShowSchedulesAgenda = ({selectedDay, disponibilidade, setDisponibilidade, professionalId}: ShowSchedulesAgendaProps) => {
     const [selectedSlot, setSelectedSlot] = useState<DisponibilidadeComAgendamentos | null>(null);
+    const [isLoadingBlockTime, setIsLoadingBlockTime] = useState(false)
+    const [isLoadingUnlockTime, setIsLoadingUnlockTime] = useState(false)
+    const [addScheduleDialogOpen, setAddScheduleDialogOpen] = useState(false)
+    const [isAddingSchedules, setIsAddingSchedules] = useState(false)
+
+    const form = useForm<AddHorarioForm>({
+        resolver: zodResolver(addHorarioSchema),
+        defaultValues: {
+          horaInicio: "",
+          intervalo: 30,
+        },
+    });
+
+    const handleAddSchedules = async (values: AddHorarioForm) => {
+        if (!selectedDay) return;
+
+        try {
+            console.log('entrou para cadastrar novo horário')
+            setIsAddingSchedules(true)
+            await addDisponibilidade({
+                professionalId,
+                selectedDay,
+                horaInicio: values.horaInicio,
+                intervalo: values.intervalo,
+            });
+
+            // Atualiza a lista local após adicionar
+            //const { getDisponibilidade } = await import("@/app/_actions/getDisponibilidade");
+            const data = await getDisponibilidade({
+                selectedDay,
+                professionalId,
+            });
+            setDisponibilidade(data);
+
+            form.reset();
+            setAddScheduleDialogOpen(false);
+            toast.success("Novos horários adicionados com sucesso!", {
+                style: {
+                    background: "#22c55e",
+                    color: "#fff",
+                },
+            });
+        } catch (error) {
+            if (error instanceof Error) {
+                toast.error(error.message, {
+                    style: {
+                        background: "#ef4444",
+                        color: "#fff",
+                    },
+                });
+            } else {
+                toast.error("Erro ao adicionar horários.");
+            }
+        } finally {
+            setIsAddingSchedules(false)
+        }
+    };
 
     const titleDialog = (slot: DisponibilidadeComAgendamentos) => {
         if(slot.status === "RESERVADO"){
@@ -69,6 +134,7 @@ const ShowSchedulesAgenda = ({selectedDay, disponibilidade, setDisponibilidade}:
 
     const handleBlock = async (slot: DisponibilidadeComAgendamentos) => {
         try{
+            setIsLoadingBlockTime(true)
             const upTime = await blockTime(slot.id, slot.profissionalId)
             setDisponibilidade((old) =>
                 old.map((d) => (d.id === slot.id ? { ...d, status: upTime.status as any } : d)),
@@ -92,11 +158,14 @@ const ShowSchedulesAgenda = ({selectedDay, disponibilidade, setDisponibilidade}:
             } else {
                 toast.error("Erro ao bloquear horário.");
             }
+        } finally {
+            setIsLoadingBlockTime(false)
         }
     }
 
     const handleUnlock = async (slot: DisponibilidadeComAgendamentos) => {
         try{
+            setIsLoadingUnlockTime(true)
             const upTime = await unlockTime(slot.id, slot.profissionalId)
             setDisponibilidade((old) =>
                 old.map((d) => (d.id === slot.id ? { ...d, status: upTime.status as any } : d)),
@@ -120,6 +189,8 @@ const ShowSchedulesAgenda = ({selectedDay, disponibilidade, setDisponibilidade}:
             } else {
                 toast.error("Erro ao desbloquear horário.");
             }
+        } finally {
+            setIsLoadingUnlockTime(false)
         }
     }
 
@@ -164,7 +235,9 @@ const ShowSchedulesAgenda = ({selectedDay, disponibilidade, setDisponibilidade}:
                                     </DialogHeader>
 
                                     <Button className="gap-2 font-bold" onClick={slot.status === "RESERVADO" ? () => copyPhone() : slot.status === "BLOQUEADO" ? () => handleUnlock(slot) : () => handleBlock(slot)}>
-                                        {labelButton(slot)}
+                                        {isLoadingBlockTime || isLoadingUnlockTime ?
+                                            <Loader2Icon className="size-4 animate-spin"/>
+                                        : labelButton(slot)}
                                     </Button>
                                 </DialogContent>
                             </Dialog>
@@ -173,6 +246,56 @@ const ShowSchedulesAgenda = ({selectedDay, disponibilidade, setDisponibilidade}:
                     </div>
                 </CardContent>
             </Card>
+
+            <Dialog open={addScheduleDialogOpen} onOpenChange={setAddScheduleDialogOpen}>
+                <DialogTrigger>
+                    <Button className="mb-5 mt-5">
+                        Cadastrar novo horário
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="w-[90%] max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden">
+                    <DialogHeader>
+                        <DialogTitle>Adicionar novos horários</DialogTitle>
+                        <DialogDescription>
+                            Os novos horários não podem conflitar com horários já existentes (LIVRE, BLOQUEADO ou RESERVADO).
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <form onSubmit={form.handleSubmit(handleAddSchedules)} className="space-y-6">
+                        <FieldGroup>
+                            <Field>
+                                <FieldLabel>Horário</FieldLabel>
+                                <FieldContent>
+                                    <Input
+                                    type="time"
+                                    {...form.register("horaInicio")}
+                                    />
+                                </FieldContent>
+                            </Field>
+
+                            <Field>
+                                <FieldLabel>Duração (minutos)</FieldLabel>
+                                <FieldContent>
+                                <Input
+                                    type="number"
+                                    min={5}
+                                    step={5}
+                                    {...form.register("intervalo", {
+                                    valueAsNumber: true,
+                                    })}
+                                />
+                                </FieldContent>
+                            </Field>
+                        </FieldGroup>
+
+                        <Button type="submit" className="w-full" disabled={isAddingSchedules}>
+                            {isAddingSchedules ? 
+                                <Loader2Icon className="size-4 animate-spin"/>
+                            : "Adicionar Horário"}
+                        </Button>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
