@@ -8,6 +8,7 @@ import { ProfessionalSchema } from "@/app/schema/professional-schema";
 import { Button } from "../ui/button";
 import { Dispatch, SetStateAction } from "react";
 import { UseFormReturn } from "react-hook-form";
+import { Loader2Icon } from "lucide-react";
 
 interface FormDialogProps {
     form: UseFormReturn<ProfessionalSchema>;
@@ -15,9 +16,10 @@ interface FormDialogProps {
     preview: string | null;
     setPreview: Dispatch<SetStateAction<string | null>>;
     submitLabel?: string;
+    isLoadingCadastraProfi: boolean
 }
 
-const FormDialog = ({ form, onSubmit, preview, setPreview, submitLabel = "Cadastrar" }: FormDialogProps) => {
+const FormDialog = ({ form, onSubmit, preview, setPreview, submitLabel = "Cadastrar", isLoadingCadastraProfi }: FormDialogProps) => {
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FieldGroup>
@@ -105,7 +107,9 @@ const FormDialog = ({ form, onSubmit, preview, setPreview, submitLabel = "Cadast
             )}
 
             <Button type="submit" className="w-full">
-                {submitLabel}
+                {isLoadingCadastraProfi ? 
+                    <Loader2Icon className="size-4 animate-spin" /> 
+                : `${submitLabel}`}
             </Button>
         </form>
     );

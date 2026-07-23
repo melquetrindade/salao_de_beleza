@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "../ui/button";
-import { BanIcon, EditIcon, UserRoundX } from "lucide-react";
+import { BanIcon, EditIcon, Loader2Icon, UserRoundX } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { Dispatch, SetStateAction } from "react";
 
@@ -14,6 +14,8 @@ interface ActionsServicesProps {
     setOpenDesactiveDialog: Dispatch<SetStateAction<boolean>>;
     isAtivacted: boolean;
     handleDesactivated: () => Promise<void>;
+    isLoadingDeleteServi: boolean
+    isLoadingDesactiveServi: boolean
 }
 
 const ActionsServices = ({
@@ -24,7 +26,9 @@ const ActionsServices = ({
     openDesactiveDialog,
     setOpenDesactiveDialog,
     isAtivacted,
-    handleDesactivated
+    handleDesactivated,
+    isLoadingDeleteServi,
+    isLoadingDesactiveServi,
 }: ActionsServicesProps) => {
     return (
         <div className="w-full">
@@ -58,7 +62,9 @@ const ActionsServices = ({
                     style={{ backgroundColor: "#dc2626" }}
                     onClick={handleDelete}
                   >
-                    Confirmar
+                    {isLoadingDeleteServi ? 
+                      <Loader2Icon className="size-4 animate-spin" /> 
+                    : 'Confirmar'}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -92,7 +98,9 @@ const ActionsServices = ({
                     style={{ backgroundColor: "#dc2626" }}
                     onClick={handleDesactivated}
                   >
-                    Confirmar
+                    {isLoadingDesactiveServi ? 
+                      <Loader2Icon className="size-4 animate-spin" /> 
+                    : 'Confirmar'}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "../ui/button";
-import { BanIcon, EditIcon, UserRoundX } from "lucide-react";
+import { BanIcon, EditIcon, Loader2Icon, UserRoundX } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { Dispatch, SetStateAction } from "react";
 import Link from "next/link";
@@ -15,7 +15,9 @@ interface ActionsProfessionalsProps {
     setOpenDesactiveDialog: Dispatch<SetStateAction<boolean>>;
     isAtivacted: boolean;
     handleDesactivated: () => Promise<void>;
-    professionalId: string
+    professionalId: string;
+    isLoadingDeleteProfi: boolean;
+    isLoadingDesactiveProfi: boolean
 }
 
 const ActionsProfessionals = ({
@@ -27,7 +29,9 @@ const ActionsProfessionals = ({
     setOpenDesactiveDialog,
     isAtivacted,
     handleDesactivated,
-    professionalId
+    professionalId,
+    isLoadingDeleteProfi,
+    isLoadingDesactiveProfi
 }: ActionsProfessionalsProps) => {
     return (
         <div className="w-full">
@@ -66,7 +70,9 @@ const ActionsProfessionals = ({
                     style={{ backgroundColor: "#dc2626" }}
                     onClick={handleDelete}
                   >
-                    Confirmar
+                    {isLoadingDeleteProfi ? 
+                      <Loader2Icon className="size-4 animate-spin" /> 
+                    : 'Confirmar'}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -100,7 +106,10 @@ const ActionsProfessionals = ({
                     style={{ backgroundColor: "#dc2626" }}
                     onClick={handleDesactivated}
                   >
-                    Confirmar
+                    {isLoadingDesactiveProfi ?
+                      <Loader2Icon className="size-4 animate-spin" /> 
+                      : 'Confirmar'
+                    }
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

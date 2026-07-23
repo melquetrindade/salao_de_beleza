@@ -31,6 +31,9 @@ const ProfessionalItem = ({
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openDesactiveDialog, setOpenDesactiveDialog] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [isLoadingUpdateProfi, setIsLoadingUpdateProfi] = useState(false)
+  const [isLoadingDeleteProfi, setIsLoadingDeleteProfi] = useState(false)
+  const [isLoadingDesactiveProfi, setIsLoadingDesactiveProfi] = useState(false)
 
   const form = useForm<ProfessionalSchema>({
     resolver: zodResolver(professionalSchema),
@@ -42,6 +45,7 @@ const ProfessionalItem = ({
 
   const onSubmit = async (data: ProfessionalSchema) => {
     try {
+      setIsLoadingUpdateProfi(true)
       const formData = new FormData();
 
       formData.append("nome", data.nome);
@@ -82,11 +86,14 @@ const ProfessionalItem = ({
       } else {
         toast.error("Erro ao atualizar profissional.");
       }
+    } finally {
+      setIsLoadingUpdateProfi(true)
     }
   };
 
   const handleDelete = async () => {
     try {
+      setIsLoadingDeleteProfi(true)
       await deleteProfessional(professional.id, professional.imgURLPublicId);
       setProfessionals((old) => old.filter((p) => p.id !== professional.id));
       setOpenDeleteDialog(false);
@@ -107,6 +114,8 @@ const ProfessionalItem = ({
       } else {
         toast.error("Erro ao excluir profissional.");
       }
+    } finally {
+      setIsLoadingDeleteProfi(false)
     }
   };
 
@@ -116,6 +125,7 @@ const ProfessionalItem = ({
 
   const handleDesactivated = async () => {
     try {
+      setIsLoadingDesactiveProfi(true)
       const action = !professional.ativo;
 
       await desactivedProfessional(professional.id, action);
@@ -148,6 +158,8 @@ const ProfessionalItem = ({
           `Erro ao ${!professional.ativo ? "ativar" : "desativar"} profissional.`,
         );
       }
+    } finally {
+      setIsLoadingDesactiveProfi(false)
     }
   };
 
@@ -197,6 +209,8 @@ const ProfessionalItem = ({
           isAtivacted={professional.ativo}
           handleDesactivated={handleDesactivated}
           professionalId={professional.id}
+          isLoadingDeleteProfi={isLoadingDeleteProfi}
+          isLoadingDesactiveProfi={isLoadingDesactiveProfi}
         />
       </CardContent>
 
@@ -222,6 +236,7 @@ const ProfessionalItem = ({
             preview={preview}
             setPreview={setPreview}
             submitLabel="Atualizar"
+            isLoadingCadastraProfi={isLoadingUpdateProfi}
           />
         </DialogContent>
       </Dialog>

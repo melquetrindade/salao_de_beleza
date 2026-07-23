@@ -9,6 +9,7 @@ import { Button } from "../ui/button";
 import { Dispatch, SetStateAction } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { ServiceSchema } from "@/app/schema/service-schema";
+import { Loader2Icon } from "lucide-react";
 
 interface FormDialogServiceProps {
     form: UseFormReturn<ServiceSchema>;
@@ -16,9 +17,10 @@ interface FormDialogServiceProps {
     preview: string | null;
     setPreview: Dispatch<SetStateAction<string | null>>;
     submitLabel?: string;
+    isLoadingCadastraServi: boolean
 }
 
-const FormDialogService = ({ form, onSubmit, preview, setPreview, submitLabel = "Cadastrar" }: FormDialogServiceProps) => {
+const FormDialogService = ({ form, onSubmit, preview, setPreview, submitLabel = "Cadastrar", isLoadingCadastraServi }: FormDialogServiceProps) => {
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FieldGroup>
@@ -133,7 +135,9 @@ const FormDialogService = ({ form, onSubmit, preview, setPreview, submitLabel = 
             )}
 
             <Button type="submit" className="w-full">
-                {submitLabel}
+                {isLoadingCadastraServi ?
+                    <Loader2Icon className="size-4 animate-spin" />
+                : `${submitLabel}`}
             </Button>
         </form>
     );

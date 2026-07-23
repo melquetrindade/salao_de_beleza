@@ -20,16 +20,6 @@ const ContainerPageServices = ({id}: ContainerPageServicesProps) => {
     const [professional, setProfessional] = useState<Profissional>()
     const [loading, setLoading] = useState(false)
 
-    // const fetchServices = async () => {
-    //     const listServices = await getServices(id)
-    //     setServices(listServices as unknown as Servico[])
-    // }
-
-    // const fetchProfessional = async () => {
-    //     const resp = await getProfessional(id)
-    //     setProfessional(resp!)
-    // }
-
     const fetchData = async () => {
         setLoading(true)
         try {
@@ -45,8 +35,6 @@ const ContainerPageServices = ({id}: ContainerPageServicesProps) => {
     }
 
     useEffect(() => {
-        // fetchServices()
-        // fetchProfessional()
         fetchData()
     }, [])
 

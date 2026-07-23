@@ -16,11 +16,14 @@ import {
   ProfessionalSchema,
 } from "@/app/schema/professional-schema";
 import FormDialog from "./form-dialog-professional";
+import { Skeleton } from "../ui/skeleton";
 
 const ListProfessionals = () => {
   const [professionals, setProfessionals] = useState<Profissional[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false)
+  const [isLoadingCadastraProfi, setIsLoadingCadastraProfi] = useState(false)
 
   const form = useForm<ProfessionalSchema>({
     resolver: zodResolver(professionalSchema),
@@ -32,6 +35,7 @@ const ListProfessionals = () => {
 
   const onSubmit = async (data: ProfessionalSchema) => {
     try {
+      setIsLoadingCadastraProfi(true)
       const formData = new FormData();
 
       formData.append("nome", data.nome);
@@ -62,16 +66,25 @@ const ListProfessionals = () => {
       } else {
         toast.error("Erro ao cadastrar profissional.");
       }
+    } finally {
+      setIsLoadingCadastraProfi(false)
     }
   };
 
-  const fetchProfessionals = async () => {
-    const listProfessionals = await getProfessionals();
-    setProfessionals(listProfessionals);
-  };
+  const fetchData = async () => {
+    setLoading(true)
+    try {
+        const [listProfessionals] = await Promise.all([
+            getProfessionals()
+        ])
+        setProfessionals(listProfessionals)
+    } finally {
+        setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    fetchProfessionals();
+    fetchData()
   }, []);
 
   const handleOpenDialog = () => {
@@ -87,7 +100,24 @@ const ListProfessionals = () => {
         </Button>
       </div>
 
-      {professionals.length == 0 ? (
+      {loading ? (
+        <>
+          <div className="grid grid-cols-2 gap-4 mb-10">
+              {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="flex flex-col items-center gap-2 min-w-[120px]">
+                      <Skeleton className="h-[179px] w-[167px] rounded-2xl bg-gray-200" />
+                      <Skeleton className="h-4 w-40 bg-gray-200" />
+                      <div className="flex justify-center gap-3">
+                        <Skeleton className="h-4 w-11 bg-gray-200" />
+                        <Skeleton className="h-4 w-11 bg-gray-200" />
+                        <Skeleton className="h-4 w-11 bg-gray-200" />
+                      </div>
+                      <Skeleton className="h-4 w-40 bg-gray-200" />
+                  </div>
+              ))}
+          </div>
+        </>
+      ) : professionals.length == 0 ? (
         <h1>Não tem profissionais</h1>
       ) : (
         <div className="grid grid-cols-2 gap-4 mb-10 ">
@@ -123,6 +153,7 @@ const ListProfessionals = () => {
             preview={preview}
             setPreview={setPreview}
             submitLabel="Cadastrar"
+            isLoadingCadastraProfi={isLoadingCadastraProfi}
           />
         </DialogContent>
       </Dialog>

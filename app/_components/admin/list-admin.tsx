@@ -13,10 +13,13 @@ import { toast } from "sonner";
 import { createAdmin } from "@/app/_actions/create-admin";
 import AdminItem from "./admin-item";
 import FormDialogAdmin from "./form-dialog-admin";
+import { Skeleton } from "../ui/skeleton";
 
 const ListAdmin = () => {
     const [administrators, setAdministrators] = useState<Administrador[]>([])
     const [openDialog, setOpenDialog] = useState(false);
+    const [loading, setLoading] = useState(false)
+    const [isLoadingCadastraAdmin, setIsLoadingCadastraAdmin] = useState(false)
 
     const form = useForm<AdminSchema>({
         resolver: zodResolver(adminSchema),
@@ -59,13 +62,26 @@ const ListAdmin = () => {
         }
     };
 
-    const fetchAdministrators = async () => {
-        const listAdministrators = await getAdmin();
-        setAdministrators(listAdministrators)
+    // const fetchAdministrators = async () => {
+    //     const listAdministrators = await getAdmin();
+    //     setAdministrators(listAdministrators)
+    // }
+
+    const fetchData = async () => {
+        setLoading(true)
+        try {
+            const [listAdministrators] = await Promise.all([
+                getAdmin()
+            ])
+            setAdministrators(listAdministrators)
+        } finally {
+            setLoading(false)
+        }
     }
 
     useEffect(() => {
-        fetchAdministrators();
+        //fetchAdministrators();
+        fetchData()
     }, []);
 
     const handleOpenDialog = () => {
@@ -80,7 +96,26 @@ const ListAdmin = () => {
                     Cadastrar Administradores
                 </Button>
                 </div>
-            {administrators.length > 0 ? (
+            {loading ? (
+                <>
+                    <div className="grid grid-cols-1 px-6 gap-4 mb-10 items-center w-full">
+                        {Array.from({ length: 3 }).map((_, index) => (
+                            <div className="flex flex-row gap-2 w-full">
+                                <div key={index} className="flex flex-col justify-start w-[75%] gap-3">
+                                    <Skeleton className="ml-10 h-[50px] w-[60px] flex items-center justify-center rounded-2xl bg-gray-200" />
+                                    <Skeleton className="h-4 w-40 flex items-center justify-center rounded-2xl bg-gray-200" />
+                                    <Skeleton className="h-4 w-40 bg-gray-200" />
+                                </div>
+
+                                <div className="py-3 px-1 flex flex-row items-end gap-3">
+                                    <Skeleton className="h-25 w-15 flex items-center justify-center rounded-2xl bg-gray-200" />
+                                    <Skeleton className="h-25 w-15 bg-gray-200" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </>
+            ) : administrators.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4 mb-10 items-center w-full">
                     {administrators.map((admin) => (
                         <AdminItem
@@ -121,3 +156,14 @@ const ListAdmin = () => {
 }
  
 export default ListAdmin;
+
+/*
+<div className="grid grid-cols-1 gap-4 mb-10 items-center w-full">
+                    {administrators.map((admin) => (
+                        <AdminItem
+                            key={admin.id}
+                            admin={admin}
+                            setAdministrators={setAdministrators}
+                        />
+                    ))}
+                </div> */

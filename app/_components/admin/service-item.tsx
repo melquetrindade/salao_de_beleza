@@ -27,6 +27,9 @@ const ServiceItem = ({ service, setServices }: ServiceItemProps) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openDesactiveDialog, setOpenDesactiveDialog] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [isLoadingUpdateServi, setIsLoadingUpdateServi] = useState(false)
+  const [isLoadingDeleteServi, setIsLoadingDeleteServi] = useState(false)
+  const [isLoadingDesactiveServi, setIsLoadingDesactiveServi] = useState(false)
 
   const form = useForm<ServiceSchema>({
     resolver: zodResolver(serviceSchema),
@@ -40,6 +43,7 @@ const ServiceItem = ({ service, setServices }: ServiceItemProps) => {
 
   const onSubmit = async (data: ServiceSchema) => {
     try {
+      setIsLoadingUpdateServi(true)
       const formData = new FormData();
 
       formData.append("nome", data.nome);
@@ -85,11 +89,14 @@ const ServiceItem = ({ service, setServices }: ServiceItemProps) => {
       } else {
         toast.error("Erro ao atualizar serviço.");
       }
+    } finally {
+      setIsLoadingUpdateServi(false)
     }
   };
 
   const handleDelete = async () => {
     try {
+      setIsLoadingDeleteServi(true)
       await deleteService(
         service.id,
         service.imgURLPublicId,
@@ -115,6 +122,8 @@ const ServiceItem = ({ service, setServices }: ServiceItemProps) => {
       } else {
         toast.error("Erro ao excluir serviço.");
       }
+    } finally {
+      setIsLoadingDeleteServi(false)
     }
   };
 
@@ -124,6 +133,7 @@ const ServiceItem = ({ service, setServices }: ServiceItemProps) => {
 
   const handleDesactivated = async () => {
     try {
+      setIsLoadingDesactiveServi(true)
       const action = !service.ativo;
 
       await desactivedService(service.id, action, service.profissionalId);
@@ -154,6 +164,8 @@ const ServiceItem = ({ service, setServices }: ServiceItemProps) => {
           `Erro ao ${!service.ativo ? "ativar" : "desativar"} serviço.`,
         );
       }
+    } finally {
+      setIsLoadingDesactiveServi(false)
     }
   };
 
@@ -202,6 +214,8 @@ const ServiceItem = ({ service, setServices }: ServiceItemProps) => {
           setOpenDesactiveDialog={setOpenDesactiveDialog}
           isAtivacted={service.ativo}
           handleDesactivated={handleDesactivated}
+          isLoadingDeleteServi={isLoadingDeleteServi}
+          isLoadingDesactiveServi={isLoadingDesactiveServi}
         />
       </CardContent>
 
@@ -235,6 +249,7 @@ const ServiceItem = ({ service, setServices }: ServiceItemProps) => {
             preview={preview}
             setPreview={setPreview}
             submitLabel="Atualizar"
+            isLoadingCadastraServi={isLoadingUpdateServi}
           />
         </DialogContent>
       </Dialog>

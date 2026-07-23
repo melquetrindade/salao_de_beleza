@@ -13,7 +13,8 @@ import { toast } from "sonner";
 import { createService } from "@/app/_actions/create-service";
 import ServiceItem from "./service-item";
 import FormDialogService from "./form-dialog-service";
-import { getProfessional, getProfessionals } from "@/app/_actions/get-professionals";
+import { getProfessional } from "@/app/_actions/get-professionals";
+import { Skeleton } from "../ui/skeleton";
 
 interface ListServicesProps {
   id: string;
@@ -24,6 +25,8 @@ const ListServices = ({ id }: ListServicesProps) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [nameProfessional, setNameProfessional] = useState<string | null>()
+  const [loading, setLoading] = useState(false)
+  const [isLoadingCadastraServi, setIsLoadingCadastraServi] = useState(false)
 
   const form = useForm<ServiceSchema>({
     resolver: zodResolver(serviceSchema),
@@ -37,6 +40,7 @@ const ListServices = ({ id }: ListServicesProps) => {
 
   const onSubmit = async (data: ServiceSchema) => {
     try {
+      setIsLoadingCadastraServi(true)
       const formData = new FormData();
 
       formData.append("nome", data.nome);
@@ -69,22 +73,27 @@ const ListServices = ({ id }: ListServicesProps) => {
       } else {
         toast.error("Erro ao cadastrar serviço.");
       }
+    } finally {
+      setIsLoadingCadastraServi(false)
     }
   };
 
-  const fetchServices = async () => {
-    const listServices = await getServices(id);
-    setServices(listServices as unknown as Servico[]);
-  };
-
-  const getNameProfessional = async () => {
-    const professional = await getProfessional(id)
-    setNameProfessional(professional?.nome)
+  const fetchData = async () => {
+    setLoading(true)
+    try {
+        const [listServices, professional] = await Promise.all([
+            getServices(id),
+            getProfessional(id),
+        ])
+        setServices(listServices as unknown as Servico[]);
+        setNameProfessional(professional?.nome)
+    } finally {
+        setLoading(false)
+    }
   }
 
   useEffect(() => {
-    fetchServices();
-    getNameProfessional()
+    fetchData()
   }, []);
 
   const handleOpenDialog = () => {
@@ -94,7 +103,9 @@ const ListServices = ({ id }: ListServicesProps) => {
   return (
     <div className="p-5">
       <div className="flex items-center justify-between mb-7">
-        {nameProfessional && (
+        { loading ? (
+          <Skeleton className="h-4 w-40 bg-gray-200" />
+        ) : nameProfessional && (
           <div>
             <h1 className="font-semibold text-sm">Serviços de {nameProfessional}</h1>
           </div>
@@ -106,7 +117,23 @@ const ListServices = ({ id }: ListServicesProps) => {
         </Button>
       </div>
 
-      {services.length > 0 ? (
+      { loading ? (
+        <>
+          <div className="grid grid-cols-2 gap-4 mb-10">
+              {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="flex flex-col items-center gap-2 min-w-[120px]">
+                      <Skeleton className="h-[179px] w-[167px] rounded-2xl bg-gray-200" />
+                      <Skeleton className="h-4 w-40 bg-gray-200" />
+                      <div className="flex justify-center gap-3">
+                        <Skeleton className="h-4 w-11 bg-gray-200" />
+                        <Skeleton className="h-4 w-11 bg-gray-200" />
+                        <Skeleton className="h-4 w-11 bg-gray-200" />
+                      </div>
+                  </div>
+              ))}
+          </div>
+        </>
+      ) : services.length > 0 ? (
         <div className="grid grid-cols-2 gap-4 mb-10 ">
           {services.map((service) => (
             <ServiceItem
@@ -142,6 +169,7 @@ const ListServices = ({ id }: ListServicesProps) => {
             preview={preview}
             setPreview={setPreview}
             submitLabel="Cadastrar"
+            isLoadingCadastraServi={isLoadingCadastraServi}
           />
         </DialogContent>
       </Dialog>
