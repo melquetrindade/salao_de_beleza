@@ -124,7 +124,7 @@ const AgendaProfessional = ({id}: AgendaProfessionalProps) => {
     return (
         <div>
             <div className='px-5 pb-4 flex justify-center'>
-                <div className="w-full max-w-[350px]">
+                <div className="w-full max-w-87.5">
                     <Calendar
                         mode="single"
                         selected={selectedDay}

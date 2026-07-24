@@ -36,7 +36,7 @@ const ActionsProfessionals = ({
     return (
         <div className="w-full">
           
-          <Button className="w-[100%]" variant="destructive">
+          <Button className="w-full" variant="destructive">
             <Link href={`/admin/calendar/${professionalId}`}>Ver agenda</Link>
           </Button>
 
@@ -50,7 +50,7 @@ const ActionsProfessionals = ({
                 
               </AlertDialogTrigger>
 
-              <AlertDialogContent className="w-[100%] ring-1 ring-secondary">
+              <AlertDialogContent className="w-full ring-1 ring-secondary">
                 <AlertDialogHeader>
                   <AlertDialogTitle>
                     Você quer excluir este profissional?
@@ -85,7 +85,7 @@ const ActionsProfessionals = ({
                 </Button>}>
               </AlertDialogTrigger>
 
-              <AlertDialogContent className="w-[100%] ring-1 ring-secondary">
+              <AlertDialogContent className="w-full ring-1 ring-secondary">
                 <AlertDialogHeader>
                   <AlertDialogTitle>
                     Você quer {isAtivacted ? 'desativar' : 'ativar'} este profissional?
@@ -117,7 +117,7 @@ const ActionsProfessionals = ({
 
             
           </div>
-          <Button className="w-[100%] mt-2" variant="outline">
+          <Button className="w-full mt-2" variant="outline">
             <Link href={`/admin/service/${professionalId}`}>Serviços</Link>
           </Button>
         </div>

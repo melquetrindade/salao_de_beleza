@@ -10,7 +10,7 @@ const Header = () => {
   return (
     <Card className="rounded-none ring-0 bg-primary pt-2 pb-2">
       <CardContent className="flex flex-row items-center justify-between">
-        <div className="relative h-[40px] w-[80px]">
+        <div className="relative h-10 w-20">
         <Link href="/admin/dashboard">
         
           <Image

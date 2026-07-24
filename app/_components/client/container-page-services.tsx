@@ -55,7 +55,7 @@ const ContainerPageServices = ({id}: ContainerPageServicesProps) => {
             <div className="flex flex-col gap-3 w-full mb-3 pb-3 border-b border-gray-300">
                 {loading ? (
                     <div className="flex items-center gap-3">
-                        <Skeleton className="h-[60px] w-[60px] rounded-full bg-gray-200" />
+                        <Skeleton className="h-15 w-15 rounded-full bg-gray-200" />
                         <div className="space-y-2 flex-1">
                             <Skeleton className="h-5 w-40 bg-gray-200" />
                             <Skeleton className="h-4 w-28 bg-gray-200" />
@@ -91,7 +91,7 @@ const ContainerPageServices = ({id}: ContainerPageServicesProps) => {
                     <div className="space-y-3">
                         {Array.from({ length: 3 }).map((_, index) => (
                             <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
-                                <Skeleton className="h-[110px] w-[110px] rounded-lg bg-gray-200" />
+                                <Skeleton className="h-27.5 w-27.5 rounded-lg bg-gray-200" />
                                 <div className="space-y-2 flex-1">
                                     <Skeleton className="h-5 w-40 bg-gray-200" />
                                     <Skeleton className="h-4 w-20 bg-gray-200" />

@@ -32,7 +32,7 @@ const ActionsAdmin = ({
                 
               </AlertDialogTrigger>
 
-              <AlertDialogContent className="w-[100%] ring-1 ring-secondary">
+              <AlertDialogContent className="w-full ring-1 ring-secondary">
                 <AlertDialogHeader>
                   <AlertDialogTitle>
                     Você quer excluir este administrador?

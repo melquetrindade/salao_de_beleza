@@ -11,11 +11,11 @@ interface ProfessioanlItemProps {
 const ProfessionalItem = ({professional}: ProfessioanlItemProps) => {
 
     return (
-        <Card className="min-w-[167px] rounded-2xl border-secondary bg-secondary ring-0">
+        <Card className="min-w-41.75 rounded-2xl border-secondary bg-secondary ring-0">
             <CardContent>
                 
                 {/*Imagem */}
-                <div className="relative h-[179px] w-full">
+                <div className="relative h-44.75 w-full">
                     {professional.imgURL ? (
                         <Image
                             alt="Imagem do Profissional"

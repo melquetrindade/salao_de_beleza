@@ -94,7 +94,7 @@ const FormDialog = ({ form, onSubmit, preview, setPreview, submitLabel = "Cadast
 
             {preview && (
                 <div className="flex justify-center">
-                <div className="relative min-w-[140px] h-[180px]">
+                <div className="relative min-w-35 h-45">
                     <Image
                     src={preview}
                     alt="Pré-visualização"

@@ -104,8 +104,8 @@ const ListProfessionals = () => {
         <>
           <div className="grid grid-cols-2 gap-4 mb-10">
               {Array.from({ length: 3 }).map((_, index) => (
-                  <div key={index} className="flex flex-col items-center gap-2 min-w-[120px]">
-                      <Skeleton className="h-[179px] w-[167px] rounded-2xl bg-gray-200" />
+                  <div key={index} className="flex flex-col items-center gap-2 min-w-30">
+                      <Skeleton className="h-44.75 w-41.75 rounded-2xl bg-gray-200" />
                       <Skeleton className="h-4 w-40 bg-gray-200" />
                       <div className="flex justify-center gap-3">
                         <Skeleton className="h-4 w-11 bg-gray-200" />

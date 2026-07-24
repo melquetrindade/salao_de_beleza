@@ -114,7 +114,7 @@ const AdminItem = ({admin, setAdministrators}: AdminItemProps) => {
 
                 <div className="flex flex-col justify-start w-[75%]">
                     {/*Imagem */}
-                    <div className="h-[40px] flex items-center justify-center rounded-2xl">
+                    <div className="h-10 flex items-center justify-center rounded-2xl">
                         <ShieldUserIcon size={38} className="text-primary" />
                     </div>
 

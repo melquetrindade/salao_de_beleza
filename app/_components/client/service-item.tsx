@@ -188,7 +188,7 @@ const ServiceItem = ({service, professionalName, professionalId}: ServiceItemPro
                 <CardContent  className='flex items-center gap-3'>
                     
                     {/*Imagem */}
-                    <div className='relative max-h-[110px] min-h-[110px] min-w-[110px] max-w-[110px]'>
+                    <div className='relative max-h-27.5 min-h-27.5 min-w-27.5 max-w-27.5'>
                         <Image alt={service.nome} src={service.imgURL!} fill className='object-cover rounded-lg'/>
                     </div>
 
@@ -223,7 +223,7 @@ const ServiceItem = ({service, professionalName, professionalId}: ServiceItemPro
 
                                     <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
                                         <div className='px-5 pb-4 flex justify-center'>
-                                            <div className="w-full max-w-[350px]">
+                                            <div className="w-full max-w-87.5">
                                                 <Calendar
                                                     mode="single"
                                                     selected={selectedDay}

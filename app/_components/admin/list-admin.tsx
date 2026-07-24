@@ -99,7 +99,7 @@ const ListAdmin = () => {
                         {Array.from({ length: 3 }).map((_, index) => (
                             <div className="flex flex-row gap-2 w-full">
                                 <div key={index} className="flex flex-col justify-start w-[75%] gap-3">
-                                    <Skeleton className="ml-10 h-[50px] w-[60px] flex items-center justify-center rounded-2xl bg-gray-200" />
+                                    <Skeleton className="ml-10 h-12.5 w-15 flex items-center justify-center rounded-2xl bg-gray-200" />
                                     <Skeleton className="h-4 w-40 flex items-center justify-center rounded-2xl bg-gray-200" />
                                     <Skeleton className="h-4 w-40 bg-gray-200" />
                                 </div>

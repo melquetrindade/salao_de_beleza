@@ -35,7 +35,7 @@ const ContainerPageInitial = () => {
     return (
         <div className="p-5">
             {/* Banner da barbearia */}
-            <div className="h-[180px] w-full flex justify-center mt-3">
+            <div className="h-45 w-full flex justify-center mt-3">
                 {loading || !barbearia ? (
                     <Skeleton className="h-full w-full rounded-xl bg-gray-200" />
                 ) : (
@@ -65,8 +65,8 @@ const ContainerPageInitial = () => {
                     <Skeleton className="mb-3 mt-6 h-4 w-24 uppercase bg-gray-200" />
                     <div className="flex gap-4 overflow-auto mb-10 [&::-webkit-scrollbar]:hidden">
                         {Array.from({ length: 3 }).map((_, index) => (
-                            <div key={index} className="flex flex-col items-center gap-2 min-w-[120px]">
-                                <Skeleton className="h-[100px] w-[100px] rounded-full bg-gray-200" />
+                            <div key={index} className="flex flex-col items-center gap-2 min-w-30">
+                                <Skeleton className="h-25 w-25 rounded-full bg-gray-200" />
                                 <Skeleton className="h-4 w-20 bg-gray-200" />
                                 <Skeleton className="h-3 w-24 bg-gray-200" />
                             </div>
