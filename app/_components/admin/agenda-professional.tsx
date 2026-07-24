@@ -12,7 +12,6 @@ import { createDisponibilidade } from "@/app/_actions/createDisponibilidade";
 import { toast } from "sonner";
 import FormDialogAgenda from "./form-dialog-agenda";
 import ShowSchedulesAgenda from "./show-schedules-agenda";
-import { Skeleton } from "../ui/skeleton";
 import { Loader2Icon } from "lucide-react";
 
 type DisponibilidadeComAgendamentos = Prisma.DisponibilidadeGetPayload<{
@@ -77,7 +76,6 @@ const AgendaProfessional = ({id}: AgendaProfessionalProps) => {
         fetchData()
     }, [selectedDay, id]);
 
-    // Loading
     const onSubmit = async (values: DisponibilidadeForm) => {
         if (!selectedDay) return;
 

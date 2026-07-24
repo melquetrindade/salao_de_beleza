@@ -52,7 +52,6 @@ const ContainerPageServices = ({id}: ContainerPageServicesProps) => {
         <div className="p-5">
             
             {/*Card Informaçõs do profissional */}
-            
             <div className="flex flex-col gap-3 w-full mb-3 pb-3 border-b border-gray-300">
                 {loading ? (
                     <div className="flex items-center gap-3">

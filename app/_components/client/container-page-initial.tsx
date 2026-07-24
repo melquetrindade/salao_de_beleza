@@ -78,7 +78,7 @@ const ContainerPageInitial = () => {
                     <h2 className="mb-3 mt-6 text-xs font-bold uppercase">
                         Profissionais
                     </h2>
-                    <div className="flex gap-4 overflow-auto mb-10 [&::-webkit-scrollbar]:hidden">
+                    <div className="grid grid-cols-2 gap-4 mb-10 ">
                     {
                         professionals.map((professional) => <ProfessionalItem key={professional.id} professional={professional}/>)
                     }
@@ -95,24 +95,3 @@ const ContainerPageInitial = () => {
 }
  
 export default ContainerPageInitial;
-
-
-/*
-<div className="relative flex h-full w-full items-end">
-                        <Image
-                            alt={'Foto da barbearia'}
-                            src={barbearia.imgURL!}
-                            fill
-                            className="rounded-xl object-cover"
-                        />
-
-                        <Card className="z-50 mx-5 mb-3 w-full rounded-xl bg-secondary">
-                            <CardContent className="flex items-center gap-3 px-5">
-                                <div>
-                                    <h3 className="font-bold">{barbearia.nome}</h3>
-                                    <p className="text-xs">{barbearia.endereco}</p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-*/

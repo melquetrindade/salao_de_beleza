@@ -6,14 +6,12 @@ import Image from "next/image"
 import { useEffect, useMemo, useState } from "react";
 import { ClockIcon, Loader2Icon } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Dialog, DialogContent } from "../ui/dialog";
 import SignInDialog from "./sign-in-dialog";
 import { Calendar } from "../ui/calendar";
 import { ptBR } from "date-fns/locale";
 import { format, set } from 'date-fns';
 import { getUser } from "@/app/_actions/get-user";
-import { Field, FieldContent, FieldError, FieldGroup, FieldLabel } from "../ui/field";
-import { Input } from "../ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PhoneClientSchema, phoneClientSchema } from "@/app/schema/phone-client-schema";
@@ -21,6 +19,8 @@ import { toast } from "sonner";
 import { createPhone } from "@/app/_actions/create-phone-client";
 import { getTimeList } from "@/app/_actions/get-time-list";
 import { createAgendamento } from "@/app/_actions/create-agendamento";
+import SummaryReserva from "./summary-reserva";
+import PhoneDialog from "./phone-dialog";
 
 interface ServiceItemProps {
     service: Servico,
@@ -125,8 +125,6 @@ const ServiceItem = ({service, professionalName, professionalId}: ServiceItemPro
         }
     }, [data?.user?.id])
 
-
-    // Ajustar o getTime para retornar apenas horários disponíveis e que não estejam no passado
     useEffect(() => {
         const fetchTimeList = async () => {
             if(!selectedDay) return
@@ -270,49 +268,13 @@ const ServiceItem = ({service, professionalName, professionalId}: ServiceItemPro
                                             <p className='text-xs'>Não há horários disponíveis para este dia.</p>
                                         </div>}
                                        
-
                                         {selectedDate && (
                                             <div className='p-5'>
-                                                <Card>
-                                                    <CardContent className='p-3 space-y-3'>
-                                                        <div className='flex items-center justify-between'>
-                                                            <h2 className='font-bold'>{service.nome}</h2>
-                                                            <p className='text-sm font-bold'>
-                                                                {Intl.NumberFormat("pt-BR", {
-                                                                    style: "currency",
-                                                                    currency: "BRL",
-                                                                }).format(Number(service.preco))}
-                                                            </p>
-                                                        </div>
-
-                                                        <div className='flex items-center justify-between'>
-                                                            <h2 className='text-sm text-gray-400'>Data</h2>
-                                                            <p className='text-sm'>
-                                                                {format(selectedDate, "d 'de' MMMM", {
-                                                                    locale: ptBR,
-                                                                })}
-                                                            </p>
-                                                        </div>
-
-                                                        <div className='flex items-center justify-between'>
-                                                            <h2 className='text-sm text-gray-400'>Horário</h2>
-                                                            <p className='text-sm'>
-                                                                {format(selectedDate, "HH:mm", {
-                                                                    locale: ptBR,
-                                                                })}
-                                                            </p>
-                                                        </div>
-
-                                                        <div className='flex items-center justify-between'>
-                                                            <h2 className='text-sm text-gray-400'>Profissional</h2>
-                                                            <p className='text-sm'>
-                                                                {professionalName}
-                                                            </p>
-                                                        </div>
-
-                                                        
-                                                    </CardContent>
-                                                </Card>
+                                                <SummaryReserva 
+                                                    service={service}
+                                                    selectedDate={selectedDate}
+                                                    professionalName={professionalName}
+                                                />
                                             </div>
                                         )}
 
@@ -341,36 +303,7 @@ const ServiceItem = ({service, professionalName, professionalId}: ServiceItemPro
 
             <Dialog open={signInDialogIsOpenPhone} onOpenChange={(open) => setSignInDialogIsOpenPhone(open)}>
                 <DialogContent className='w-[90%]'>
-                    <DialogHeader>
-                        <DialogTitle>Informe seu telefone</DialogTitle>
-                        <DialogDescription>
-                        Antes de reservar um serviço, cadastre seu telefone para contato!
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <FieldGroup>
-                            
-                            <Field>
-                                <FieldLabel htmlFor="telefone">Telefone</FieldLabel>
-                                <FieldContent>
-                                    <Input
-                                    id="telefone"
-                                    placeholder="(84) 99999-9999"
-                                    {...form.register("telefone")}
-                                    />
-
-                                    <FieldError>{form.formState.errors.telefone?.message}</FieldError>
-                                </FieldContent>
-                            </Field>
-
-                        </FieldGroup>
-
-                        <Button type="submit" className="w-full">
-                            Cadastrar telefone
-                        </Button>
-                    </form>
-
+                    <PhoneDialog form={form} onSubmit={onSubmit}/>
                 </DialogContent>
             </Dialog>
         </>

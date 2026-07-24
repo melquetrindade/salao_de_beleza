@@ -87,7 +87,7 @@ const ProfessionalItem = ({
         toast.error("Erro ao atualizar profissional.");
       }
     } finally {
-      setIsLoadingUpdateProfi(true)
+      setIsLoadingUpdateProfi(false)
     }
   };
 

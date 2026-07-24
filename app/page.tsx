@@ -6,7 +6,6 @@ import Header from "./_components/client/header";
 import ContainerPageInitial from "./_components/client/container-page-initial";
 
 
-
 export default async function Home() {
   const session = await getServerSession(authOptions);
 

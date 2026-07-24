@@ -10,11 +10,9 @@ import { signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { CalendarIcon, FileUserIcon, HomeIcon, LogInIcon, LogOutIcon, Loader2Icon } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import Link from "next/link";
 import SignInDialog from "./sign-in-dialog";
-import { Field, FieldContent, FieldError, FieldGroup, FieldLabel } from "../ui/field";
-import { Input } from "../ui/input";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { perfilUserSchema, PerfilUserSchema } from "@/app/schema/perfil-user-schema";
@@ -23,6 +21,7 @@ import { useForm } from "react-hook-form";
 import { updatePerfilUser } from "@/app/_actions/update-perfil-user";
 import { getUser } from "@/app/_actions/get-user";
 import { User } from "@prisma/client";
+import UpdatePerfilDialog from "./update-perfil-dialog";
 
 const SiderbarSheetClient = () => {
   const { data } = useSession();
@@ -177,53 +176,7 @@ const SiderbarSheetClient = () => {
 
       <Dialog open={dialogIsOpenPerfil} onOpenChange={(open) => setDialogIsOpenPerfil(open)}>
         <DialogContent className='w-[90%]'>
-            <DialogHeader>
-                <DialogTitle>Atualize seus dados</DialogTitle>
-                  <DialogDescription>
-                    Mantenha seus dados sempre atualizados!
-                  </DialogDescription>
-            </DialogHeader>
-
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FieldGroup>
-                    
-                    <Field>
-                        <FieldLabel htmlFor="nome">Nome</FieldLabel>
-                        <FieldContent>
-                            <Input
-                              id="nome"
-                              placeholder="Digite seu nome..."
-                              {...form.register("nome")}
-                            />
-
-                            <FieldError>{form.formState.errors.nome?.message}</FieldError>
-                        </FieldContent>
-                    </Field>
-
-                    <Field>
-                        <FieldLabel htmlFor="telefone">Telefone</FieldLabel>
-                        <FieldContent>
-                            <Input
-                              id="telefone"
-                              placeholder="(84) 99999-9999"
-                              {...form.register("telefone")}
-                            />
-
-                            <FieldError>{form.formState.errors.telefone?.message}</FieldError>
-                        </FieldContent>
-                    </Field>
-
-                </FieldGroup>
-
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                        <Loader2Icon className="size-4 animate-spin" />
-                    ) : (
-                        "Atualizar"
-                    )}
-                </Button>
-            </form>
-
+          <UpdatePerfilDialog form={form} onSubmit={onSubmit} isSubmitting={isSubmitting}/>
         </DialogContent>
       </Dialog>
     </SheetContent>

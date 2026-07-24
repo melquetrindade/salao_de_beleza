@@ -1,10 +1,9 @@
 "use client"
 
-import { useForm, Controller } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { Field, FieldContent, FieldError, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
 import Image from "next/image";
-import { ProfessionalSchema } from "@/app/schema/professional-schema";
 import { Button } from "../ui/button";
 import { Dispatch, SetStateAction } from "react";
 import { UseFormReturn } from "react-hook-form";

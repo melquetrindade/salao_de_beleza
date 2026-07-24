@@ -7,7 +7,6 @@ import ListProfessionals from "@/app/_components/admin/list-professionals";
 const Profissionais = async () => {
     const session = await getServerSession(authOptions);
     
-    
     if (!session || session.user.role !== "admin") {
         redirect("/admin");
     }
@@ -15,9 +14,7 @@ const Profissionais = async () => {
     return (
         <div>
             <Header/>
-
             <ListProfessionals/>
-            
         </div>
     );
 }

@@ -22,7 +22,6 @@ export default async function Calendar({params}: ServicePageProps) {
   return (
     <div>
       <Header />
-
       <AgendaProfessional id={id}/>
     </div>
   );

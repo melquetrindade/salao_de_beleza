@@ -13,7 +13,6 @@ const ServicePage = async ({params}: ServicesPageProps) => {
     return (
         <div>
             <Header/>
-
             <ContainerPageServices id={id}/>
         </div>
         

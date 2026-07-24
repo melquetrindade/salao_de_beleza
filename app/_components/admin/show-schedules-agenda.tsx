@@ -71,7 +71,6 @@ const ShowSchedulesAgenda = ({selectedDay, disponibilidade, setDisponibilidade, 
             });
 
             // Atualiza a lista local após adicionar
-            //const { getDisponibilidade } = await import("@/app/_actions/getDisponibilidade");
             const data = await getDisponibilidade({
                 selectedDay,
                 professionalId,
@@ -194,8 +193,14 @@ const ShowSchedulesAgenda = ({selectedDay, disponibilidade, setDisponibilidade, 
         }
     }
 
-    const copyPhone = () => {
-        console.log('Copia telefone')
+    const copyPhone = (phone: string) => {
+        navigator.clipboard.writeText(phone)
+        toast.success("Telefone copiado com sucesso!", {
+          style: {
+            background: "#22c55e",
+            color: "#fff",
+          },
+        },)
     }
 
     return (
@@ -234,7 +239,7 @@ const ShowSchedulesAgenda = ({selectedDay, disponibilidade, setDisponibilidade, 
                                         </DialogDescription>
                                     </DialogHeader>
 
-                                    <Button className="gap-2 font-bold" onClick={slot.status === "RESERVADO" ? () => copyPhone() : slot.status === "BLOQUEADO" ? () => handleUnlock(slot) : () => handleBlock(slot)}>
+                                    <Button className="gap-2 font-bold" onClick={slot.status === "RESERVADO" ? () => copyPhone(slot.agendamentos[0]?.usuario?.telefone!) : slot.status === "BLOQUEADO" ? () => handleUnlock(slot) : () => handleBlock(slot)}>
                                         {isLoadingBlockTime || isLoadingUnlockTime ?
                                             <Loader2Icon className="size-4 animate-spin"/>
                                         : labelButton(slot)}

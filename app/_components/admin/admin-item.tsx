@@ -13,7 +13,6 @@ import { updateAdmin } from "@/app/_actions/update-admin";
 import { deleteAdmin } from "@/app/_actions/delete-admin";
 import ActionsAdmin from "./actions-admin";
 import FormDialogAdmin from "./form-dialog-admin";
-import { finalize } from "zod/v4/core";
 
 interface AdminItemProps {
     admin: Administrador,

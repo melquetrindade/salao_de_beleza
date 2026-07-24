@@ -1,6 +1,5 @@
 "use server"
 
-import { revalidatePath } from 'next/cache'
 import {db} from '../_lib/prisma'
 
 export const createPhone = async (formData: FormData, userId: string) => {
@@ -28,6 +27,5 @@ export const createPhone = async (formData: FormData, userId: string) => {
         }
     })
 
-    //revalidatePath('/services/')
     return upPhone.telefone
 }

@@ -11,8 +11,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { BookUser, HomeIcon, LockIcon, LogOutIcon} from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { getOwner } from "@/app/_actions/get-admin";
 
 const SiderbarSheetAdmin = () => {
   const { data } = useSession();

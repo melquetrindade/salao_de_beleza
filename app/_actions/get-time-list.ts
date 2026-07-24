@@ -26,5 +26,20 @@ export const getTimeList = async ({ professionalId, selectedDay }: GetTimeListPr
         },
     });
 
+    // Filtra horários no passado se o dia selecionado for hoje
+    const agora = new Date();
+    const hoje = new Date();
+    const isHoje =
+        selectedDay.getDate() === hoje.getDate() &&
+        selectedDay.getMonth() === hoje.getMonth() &&
+        selectedDay.getFullYear() === hoje.getFullYear();
+
+    if (isHoje) {
+        return horariosDisponiveis.filter((slot) => {
+            const horaSlot = new Date(slot.horaInicio);
+            return horaSlot > agora;
+        });
+    }
+
     return horariosDisponiveis
 }
