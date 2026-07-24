@@ -3,20 +3,37 @@
 import Image from "next/image";
 import { Card, CardContent } from "../ui/card";
 import { useEffect, useState } from "react";
-import { Barbearia, Profissional } from "@prisma/client";
+import { Barbearia, Profissional, Prisma } from "@prisma/client";
 import { getBarbearia } from "@/app/_actions/get-barbearia";
 import { getProfessionals } from "@/app/_actions/get-professionals";
 import ProfessionalItem from "./professional-item";
 import { Skeleton } from "../ui/skeleton";
+import { useSession } from "next-auth/react";
+import { getAgendamentosConfirmad } from "@/app/_actions/get-agendamentos-confirmad";
+import AgendamentoItem from "./agendamentos-item";
+
+type AgendamentoComIncludes = Prisma.AgendamentoGetPayload<{
+    include: {
+        servico: true,
+        disponibilidade: {
+            include: {
+                profissional: true,
+            },
+        },
+    },
+}>
 
 const ContainerPageInitial = () => {
+    const {data} = useSession()
     const [barbearia, setBarbearia] = useState<Barbearia>()
     const [professionals, setProfessionals] = useState<Profissional[]>([])
+    const [agendamentos, setAgendamentos] = useState<AgendamentoComIncludes[]>([])
     const [loading, setLoading] = useState(false)
+    const [loadingAgendamentos, setLoadingAgendamentos] = useState(false)
 
     const fetchData = async () => {
-        setLoading(true)
         try {
+            setLoading(true)
             const [barbeariaData, professionalsData] = await Promise.all([
                 getBarbearia(),
                 getProfessionals(),
@@ -31,6 +48,22 @@ const ContainerPageInitial = () => {
     useEffect(() => {
         fetchData()
     }, [])
+
+    const fetchAgendamentos = async () => {
+        try{
+            setLoadingAgendamentos(true)
+            const agendamentosConfirmad = await getAgendamentosConfirmad()
+            setAgendamentos(agendamentosConfirmad)
+        } finally {
+            setLoadingAgendamentos(false)
+        }
+    }
+
+    useEffect(() => {
+        if(data?.user?.id){
+            fetchAgendamentos()
+        }
+    },[data?.user?.id])
 
     return (
         <div className="p-5">
@@ -58,6 +91,22 @@ const ContainerPageInitial = () => {
                     </div>
                 )}
             </div>
+
+            {/*Agendamentos Confirmados */}
+            {loadingAgendamentos ? (
+                <p>Carregando...</p>
+            ) : agendamentos.length > 0 ? (
+                <>
+                    <h2 className="mb-3 mt-6 text-xs font-bold uppercase text-gray-400">
+                        Agendamentos
+                    </h2>
+                    <div className="gap-3 flex overflow-x-auto [&::-webkit-scrollbar]:hidden">
+                        {agendamentos.map(agendamento => (
+                            <AgendamentoItem key={agendamento.id} agendamento={agendamento}/>
+                        ))}
+                    </div>
+                </>
+            ) : null}
 
             {/* Profissionais */}
             {loading ? (
